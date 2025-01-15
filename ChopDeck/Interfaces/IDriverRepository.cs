@@ -1,0 +1,16 @@
+﻿using ChopDeck.Models;
+
+namespace ChopDeck.Interfaces
+{
+    public interface IDriverRepository
+    {
+        Task<Driver?> GetByIdAsync(int id);
+        Task<Driver?> GetByUserIdAsync(string id);
+        Task<Driver?> GetByEmailAsync(string email);
+        Task<Driver> CreateAsync(Driver driver);
+        Task<Driver> UpdateAsync(Driver driver);
+        Task<Driver?> DeleteAsync(int id, string userId);
+        Task<bool> DriverEmailExists(string email);
+        Task<bool> DriverExists(int id);
+    }
+}
