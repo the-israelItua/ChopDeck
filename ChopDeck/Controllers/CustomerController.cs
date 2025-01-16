@@ -161,7 +161,7 @@ namespace ChopDeck.Controllers
 
         [HttpGet("orders/{id:int}")]
         [Authorize]
-        public async Task<IActionResult> GetCstomerOrderById([FromRoute] int id)
+        public async Task<IActionResult> GetCustomerOrderById([FromRoute] int id)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var order = await _orderRepo.GetCustomerOrderByIdAsync(id, userId);

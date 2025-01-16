@@ -9,8 +9,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ChopDeck.helpers;
 using ChopDeck.Dtos.Orders;
+using Castle.Core.Resource;
+using Microsoft.AspNetCore.Http.HttpResults;
+using System.Net;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
-namespace ChopDeck.Tests.Controllers
+namespace ChopDeck_Tests.Controllers
 {
 
     public class CustomerControllerTest
@@ -30,6 +35,18 @@ namespace ChopDeck.Tests.Controllers
             _orderRepo = A.Fake<IOrderRepository>();
 
             _customerController = new CustomerController(_userManager, _tokenService, _signInManager, _customerRepo, _orderRepo);
+        }
+        private void SetUser(string userId)
+        {
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+        new Claim(ClaimTypes.NameIdentifier, userId)
+    }, "TestAuthentication"));
+
+            _customerController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = user }
+            };
         }
 
         private CreateCustomerDto CreateCustomerDto()
@@ -55,9 +72,9 @@ namespace ChopDeck.Tests.Controllers
             };
         }
 
-        private Customer CreateCustomer()
+        private ApplicationUser CreateApplicationUser()
         {
-            var applicationUser = new ApplicationUser
+            return new ApplicationUser
             {
                 UserName = "test@gmail.com",
                 Email = "test@gmail.com",
@@ -67,9 +84,29 @@ namespace ChopDeck.Tests.Controllers
                 Lga = "Test lga",
                 State = "Test state",
             };
+        }
+
+        private Customer CreateCustomer()
+        {
             return new Customer
             {
-                ApplicationUser = applicationUser,
+                ApplicationUser = CreateApplicationUser(),
+            };
+        }
+
+        private Restaurant CreateRestaurant()
+        {
+            return new Restaurant
+            {
+                ApplicationUser = CreateApplicationUser(),
+            };
+        }
+
+        private Driver CreateDriver()
+        {
+            return new Driver
+            {
+                ApplicationUser = CreateApplicationUser(),
             };
         }
 
@@ -226,11 +263,15 @@ namespace ChopDeck.Tests.Controllers
         {
             var ordersQueryObject = new CustomerOrdersQueryObject();
             var userId = "12345";
+            SetUser(userId);
+
             var orders = new List<Order>
                 {
-                    new Order { Id = 1, TotalAmount = 100, Amount= 100, DeliveryFee = 20,ServiceCharge = 10 },
-                    new Order { Id = 1, TotalAmount = 100, Amount= 100, DeliveryFee = 20,ServiceCharge = 10 },
+                    new Order { Id = 1,CustomerId = 1, Customer = CreateCustomer(), Restaurant = CreateRestaurant(), Driver = CreateDriver(), TotalAmount = 100, Amount= 100, DeliveryFee = 20,ServiceCharge = 10 },
+                    new Order { Id = 2, Customer = CreateCustomer(),  Restaurant = CreateRestaurant(), Driver = CreateDriver(), TotalAmount = 100, Amount= 100, DeliveryFee = 20,ServiceCharge = 10 },
              };
+        
+
             A.CallTo(() => _orderRepo.GetCustomerOrdersAsync(userId, ordersQueryObject)).Returns(orders);
             var result = await _customerController.GetOrders(ordersQueryObject);
             var okResult = result.Should().BeOfType<OkObjectResult>().Which;
@@ -244,5 +285,72 @@ namespace ChopDeck.Tests.Controllers
             apiResponse.Data[0].Should().BeOfType<OrderDto>();
         }
 
+        [Fact]
+        public async Task CustomerController_GetOrderById_ReturnsNotFound()
+        {
+            var userId = "1234";
+            SetUser(userId);
+            var id = 1;
+            A.CallTo(() => _orderRepo.GetCustomerOrderByIdAsync(id, userId)).Returns(Task.FromResult<Order?>(null));
+            var result = await _customerController.GetCustomerOrderById(id);
+            var notFoundResult = result.Should().BeOfType<NotFoundObjectResult>().Which;
+            notFoundResult.StatusCode.Should().Be(404);
+
+            var errorResponse = notFoundResult.Value.As<ErrorResponse<string>>();
+            errorResponse.Should().NotBeNull();
+            errorResponse.Status.Should().Be(404);
+            errorResponse.Message.Should().Be("Order not found");
+        }
+
+        [Fact]
+        public async Task CustomerController_GetOrderById_ReturnsSuccessfully()
+        {
+            var userId = "12334";
+            SetUser(userId);
+            var id = 1;
+            var order = new Order { Id = 1, CustomerId = 1, Customer = CreateCustomer(), Restaurant = CreateRestaurant(), Driver = CreateDriver(), TotalAmount = 100, Amount = 100, DeliveryFee = 20, ServiceCharge = 10 };
+            A.CallTo(() => _orderRepo.GetCustomerOrderByIdAsync(id, userId)).Returns(order);
+            var result = await _customerController.GetCustomerOrderById(id);
+
+            var okResult = result.Should().BeOfType<OkObjectResult>().Which;
+            okResult.StatusCode.Should().Be(200);
+
+            var apiResponse = okResult.Value.As<ApiResponse<OrderDto>>();
+            apiResponse.Should().NotBeNull();
+            apiResponse.Status.Should().Be(200);
+            apiResponse.Message.Should().Be("Order fetched successfully");
+            apiResponse.Data.Should().NotBeNull();
+        }
+
+        [Fact]
+        public async Task CustomerController_DeleteCustomer_ReturnsNotFound()
+        {
+            var userId = "12334";
+            SetUser(userId);
+            var id = 1;
+            A.CallTo(() => _customerRepo.DeleteAsync(id, userId)).Returns(Task.FromResult<Customer?>(null));
+            var result = await _customerController.GetCustomerOrderById(id);
+
+            var notFoundResult = result.Should().BeOfType<NotFoundObjectResult>().Which;
+            notFoundResult.StatusCode.Should().Be(404);
+
+            var errorResponse = notFoundResult.Value.As<ErrorResponse<string>>();
+            errorResponse.Should().NotBeNull();
+            errorResponse.Status.Should().Be(404);
+            errorResponse.Message.Should().Be("Customer not found");
+        }
+
+        [Fact]
+        public async Task CustomerController_DeleteCustomer_ReturnsSuccessfully()
+        {
+            var userId = "12334";
+            SetUser(userId);
+            var id = 1;
+            var customer = CreateCustomer();
+            A.CallTo(() => _customerRepo.DeleteAsync(id, userId)).Returns(customer);
+            var result = await _customerController.GetCustomerOrderById(id);
+
+            result.Should().BeOfType<NoContentResult>();
+        }
     }
 }

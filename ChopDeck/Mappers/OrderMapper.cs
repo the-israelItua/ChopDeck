@@ -19,11 +19,11 @@ namespace ChopDeck.Mappers
                 ServiceCharge = order.ServiceCharge,
                 DeliveryFee = order.DeliveryFee,
                 CustomerId = order.CustomerId,
-                Customer = order.Customer.ToCustomerDto(),
+                Customer = order.Customer?.ToCustomerDto(),
                 RestaurantId = order.RestaurantId,
-                Restaurant = order.Restaurant.ToRestaurantDto(),
+                Restaurant = order.Restaurant?.ToRestaurantDto(),
                 DriverId = order.DriverId,
-                Driver = order.Driver.ToDriverDto(),
+                Driver = order.Driver?.ToDriverDto(),
                 Status = order.Status,
                 CreatedAt = order.CreatedAt
             };
