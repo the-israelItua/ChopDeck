@@ -9,11 +9,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using ChopDeck.helpers;
 using ChopDeck.Dtos.Orders;
-using Castle.Core.Resource;
-using Microsoft.AspNetCore.Http.HttpResults;
-using System.Net;
-using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
 
 namespace ChopDeck_Tests.Controllers
 {
@@ -35,85 +30,12 @@ namespace ChopDeck_Tests.Controllers
             _orderRepo = A.Fake<IOrderRepository>();
 
             _customerController = new CustomerController(_userManager, _tokenService, _signInManager, _customerRepo, _orderRepo);
-        }
-        private void SetUser(string userId)
-        {
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
-            {
-        new Claim(ClaimTypes.NameIdentifier, userId)
-    }, "TestAuthentication"));
-
-            _customerController.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
-        }
-
-        private CreateCustomerDto CreateCustomerDto()
-        {
-            return new CreateCustomerDto
-            {
-                Name = "Test User",
-                Address = "123 Test St",
-                Lga = "Test LGA",
-                State = "Test State",
-                Email = "test@example.com",
-                PhoneNumber = "09160275869",
-                Password = "TestPassword123"
-            };
-        }
-
-        private LoginDto LoginDto()
-        {
-            return new LoginDto
-            {
-                Email = "test@example.com",
-                Password = "TestPassword123"
-            };
-        }
-
-        private ApplicationUser CreateApplicationUser()
-        {
-            return new ApplicationUser
-            {
-                UserName = "test@gmail.com",
-                Email = "test@gmail.com",
-                UserType = "Customer",
-                Name = "Test",
-                Address = "Test address",
-                Lga = "Test lga",
-                State = "Test state",
-            };
-        }
-
-        private Customer CreateCustomer()
-        {
-            return new Customer
-            {
-                ApplicationUser = CreateApplicationUser(),
-            };
-        }
-
-        private Restaurant CreateRestaurant()
-        {
-            return new Restaurant
-            {
-                ApplicationUser = CreateApplicationUser(),
-            };
-        }
-
-        private Driver CreateDriver()
-        {
-            return new Driver
-            {
-                ApplicationUser = CreateApplicationUser(),
-            };
-        }
+        } 
 
         [Fact]
         public async Task CustomerController_Register_ReturnsCustomerExists()
         {
-            var createCustomerDto = CreateCustomerDto();
+            var createCustomerDto = Helpers.CreateCustomerDto();
             A.CallTo(() => _customerRepo.CustomerEmailExists(createCustomerDto.Email)).Returns(true);
 
             var result = await _customerController.Register(createCustomerDto);
@@ -130,7 +52,7 @@ namespace ChopDeck_Tests.Controllers
         [Fact]
         public async Task CustomerController_Register_ReturnsSuccessful()
         {
-            var createCustomerDto = CreateCustomerDto();
+            var createCustomerDto = Helpers.CreateCustomerDto();
 
             A.CallTo(() => _customerRepo.CustomerEmailExists(createCustomerDto.Email)).Returns(false);
 
@@ -167,7 +89,7 @@ namespace ChopDeck_Tests.Controllers
         [Fact]
         public async Task CustomerController_Register_ReturnsServerErrorOnFailure()
         {
-            var createCustomerDto = CreateCustomerDto();
+            var createCustomerDto = Helpers.CreateCustomerDto();
 
             A.CallTo(() => _customerRepo.CustomerEmailExists(createCustomerDto.Email)).Returns(false);
 
@@ -200,7 +122,7 @@ namespace ChopDeck_Tests.Controllers
         [Fact]
         public async Task CustomerController_Login_ReturnsUnauthorizedWhenNotFound()
         {
-            var loginDto = LoginDto();
+            var loginDto = Helpers.LoginDto();
 
             A.CallTo(() => _customerRepo.GetByEmailAsync(loginDto.Email)).Returns(Task.FromResult<Customer?>(null));
 
@@ -217,8 +139,8 @@ namespace ChopDeck_Tests.Controllers
         [Fact]
         public async Task CustomerController_Login_ReturnsUnauthorizedWhenIncorrectPassword()
         {
-            var loginDto = LoginDto();
-            var customer = CreateCustomer();
+            var loginDto = Helpers.LoginDto();
+            var customer = Helpers.CreateCustomer();
 
             A.CallTo(() => _customerRepo.GetByEmailAsync(loginDto.Email)).Returns(Task.FromResult<Customer?>(customer));
 
@@ -238,8 +160,8 @@ namespace ChopDeck_Tests.Controllers
         [Fact]
         public async Task CustomerController_Login_ReturnsSuccessfull()
         {
-            var loginDto = LoginDto();
-            var customer = CreateCustomer();
+            var loginDto = Helpers.LoginDto();
+            var customer = Helpers.CreateCustomer();
             A.CallTo(() => _customerRepo.GetByEmailAsync(loginDto.Email)).Returns(Task.FromResult<Customer?>(customer));
             A.CallTo(() => _signInManager.CheckPasswordSignInAsync(customer.ApplicationUser, loginDto.Password, false))
             .Returns(Task.FromResult(Microsoft.AspNetCore.Identity.SignInResult.Success));
@@ -263,12 +185,12 @@ namespace ChopDeck_Tests.Controllers
         {
             var ordersQueryObject = new CustomerOrdersQueryObject();
             var userId = "12345";
-            SetUser(userId);
+            Helpers.SetUser(_customerController, userId);
 
             var orders = new List<Order>
                 {
-                    new Order { Id = 1,CustomerId = 1, Customer = CreateCustomer(), Restaurant = CreateRestaurant(), Driver = CreateDriver(), TotalAmount = 100, Amount= 100, DeliveryFee = 20,ServiceCharge = 10 },
-                    new Order { Id = 2, Customer = CreateCustomer(),  Restaurant = CreateRestaurant(), Driver = CreateDriver(), TotalAmount = 100, Amount= 100, DeliveryFee = 20,ServiceCharge = 10 },
+                    new Order { Id = 1,CustomerId = 1, Customer = Helpers.CreateCustomer(), Restaurant = Helpers.CreateRestaurant(), Driver = Helpers.CreateDriver(), TotalAmount = 100, Amount= 100, DeliveryFee = 20,ServiceCharge = 10 },
+                    new Order { Id = 2, Customer = Helpers.CreateCustomer(),  Restaurant = Helpers.CreateRestaurant(), Driver = Helpers.CreateDriver(), TotalAmount = 100, Amount= 100, DeliveryFee = 20,ServiceCharge = 10 },
              };
         
 
@@ -289,7 +211,7 @@ namespace ChopDeck_Tests.Controllers
         public async Task CustomerController_GetOrderById_ReturnsNotFound()
         {
             var userId = "1234";
-            SetUser(userId);
+            Helpers.SetUser(_customerController, userId);
             var id = 1;
             A.CallTo(() => _orderRepo.GetCustomerOrderByIdAsync(id, userId)).Returns(Task.FromResult<Order?>(null));
             var result = await _customerController.GetCustomerOrderById(id);
@@ -306,9 +228,9 @@ namespace ChopDeck_Tests.Controllers
         public async Task CustomerController_GetOrderById_ReturnsSuccessfully()
         {
             var userId = "12334";
-            SetUser(userId);
+            Helpers.SetUser(_customerController, userId);
             var id = 1;
-            var order = new Order { Id = 1, CustomerId = 1, Customer = CreateCustomer(), Restaurant = CreateRestaurant(), Driver = CreateDriver(), TotalAmount = 100, Amount = 100, DeliveryFee = 20, ServiceCharge = 10 };
+            var order = new Order { Id = 1, CustomerId = 1, Customer = Helpers.CreateCustomer(), Restaurant = Helpers.CreateRestaurant(), Driver = Helpers.CreateDriver(), TotalAmount = 100, Amount = 100, DeliveryFee = 20, ServiceCharge = 10 };
             A.CallTo(() => _orderRepo.GetCustomerOrderByIdAsync(id, userId)).Returns(order);
             var result = await _customerController.GetCustomerOrderById(id);
 
@@ -326,10 +248,10 @@ namespace ChopDeck_Tests.Controllers
         public async Task CustomerController_DeleteCustomer_ReturnsNotFound()
         {
             var userId = "12334";
-            SetUser(userId);
+            Helpers.SetUser(_customerController, userId);
             var id = 1;
             A.CallTo(() => _customerRepo.DeleteAsync(id, userId)).Returns(Task.FromResult<Customer?>(null));
-            var result = await _customerController.GetCustomerOrderById(id);
+            var result = await _customerController.DeleteCustomer(id);
 
             var notFoundResult = result.Should().BeOfType<NotFoundObjectResult>().Which;
             notFoundResult.StatusCode.Should().Be(404);
@@ -337,18 +259,18 @@ namespace ChopDeck_Tests.Controllers
             var errorResponse = notFoundResult.Value.As<ErrorResponse<string>>();
             errorResponse.Should().NotBeNull();
             errorResponse.Status.Should().Be(404);
-            errorResponse.Message.Should().Be("Customer not found");
+            errorResponse.Message.Should().Be("Customer not found.");
         }
 
         [Fact]
         public async Task CustomerController_DeleteCustomer_ReturnsSuccessfully()
         {
             var userId = "12334";
-            SetUser(userId);
+            Helpers.SetUser(_customerController, userId);
             var id = 1;
-            var customer = CreateCustomer();
+            var customer = Helpers.CreateCustomer();
             A.CallTo(() => _customerRepo.DeleteAsync(id, userId)).Returns(customer);
-            var result = await _customerController.GetCustomerOrderById(id);
+            var result = await _customerController.DeleteCustomer(id);
 
             result.Should().BeOfType<NoContentResult>();
         }
