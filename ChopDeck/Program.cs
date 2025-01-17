@@ -91,6 +91,7 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IDriverRepository, DriverRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddHttpClient<IPaystackService, PaystackService>();
 builder.Services.AddScoped<RoleService>();
 
 var app = builder.Build();
