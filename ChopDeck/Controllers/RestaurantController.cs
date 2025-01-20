@@ -32,6 +32,11 @@ namespace ChopDeck.Controllers
             _orderRepo = orderRepo;
         }
 
+        /// <summary>
+        /// Register restaurant account
+        /// </summary>
+        /// <param name="createRestaurantDto"></param>
+        /// <returns></returns>
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] CreateRestaurantDto createRestaurantDto)
         {
@@ -116,6 +121,11 @@ namespace ChopDeck.Controllers
             }
         }
 
+        /// <summary>
+        /// Restaurant login
+        /// </summary>
+        /// <param name="loginDto"></param>
+        /// <returns></returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
@@ -149,6 +159,11 @@ namespace ChopDeck.Controllers
             });
         }
 
+        /// <summary>
+        /// Fetch restaurants
+        /// </summary>
+        /// <param name="queryObject"></param>
+        /// <returns></returns>
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetRestaurants([FromQuery] RestaurantQueryObject queryObject)
@@ -162,6 +177,12 @@ namespace ChopDeck.Controllers
                 Data = mappedRestaurants
             });
         }
+
+        /// <summary>
+        /// Get restaurant by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
 
         [HttpGet("{id:int}")]
         [Authorize]
@@ -186,9 +207,14 @@ namespace ChopDeck.Controllers
             });
         }
 
+        /// <summary>
+        /// Update restaurant details
+        /// </summary>
+        /// <param name="updateDto"></param>
+        /// <returns></returns>
         [HttpPatch]
         [Authorize]
-        public async Task<IActionResult> UpdateRestaurant([FromRoute] int id, UpdateRestaurantDto updateDto)
+        public async Task<IActionResult> UpdateRestaurant([FromBody] UpdateRestaurantDto updateDto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var restaurant = await _restaurantRepo.GetByUserIdAsync(userId);
@@ -235,6 +261,11 @@ namespace ChopDeck.Controllers
 
         }
 
+        /// <summary>
+        /// Get restaurant orders
+        /// </summary>
+        /// <param name="queryObject"></param>
+        /// <returns></returns>
         [HttpGet("orders")]
         [Authorize]
         public async Task<IActionResult> GetRestaurantOrders([FromQuery] RestaurantOrdersQueryObject queryObject)
@@ -249,6 +280,11 @@ namespace ChopDeck.Controllers
             });
         }
 
+        /// <summary>
+        /// Get order by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("orders/{id:int}")]
         [Authorize]
         public async Task<IActionResult> GetRestaurantOrderById([FromRoute] int id)
@@ -273,6 +309,12 @@ namespace ChopDeck.Controllers
             });
         }
 
+        /// <summary>
+        /// Update order status
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="updateDto"></param>
+        /// <returns></returns>
         [HttpPatch("orders/{id:int}")]
         [Authorize]
         public async Task<IActionResult> UpdateOrderStatus([FromRoute] int id, UpdateRestaurantOrderDto updateDto)
@@ -306,9 +348,14 @@ namespace ChopDeck.Controllers
 
         }
 
+        /// <summary>
+        /// Delete restaurant account
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete]
         [Route("{id}")]
-        public async Task<IActionResult> DeleteDriver([FromRoute] int id)
+        public async Task<IActionResult> DeleteRestaurant([FromRoute] int id)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var restaurant = await _restaurantRepo.DeleteAsync(id, userId);

@@ -46,14 +46,8 @@ namespace ChopDeck.Repository
             return await _applicationDBContext.Drivers.AnyAsync(s => s.Id == id);
         }
 
-        public async Task<Driver?> DeleteAsync(int id, string userId)
+        public async Task<Driver?> DeleteAsync(Driver driver)
         {
-            var driver = await _applicationDBContext.Drivers.FirstOrDefaultAsync(s => s.Id == id && s.ApplicationUserId == userId);
-            if (driver == null)
-            {
-                return null;
-            }
-
             _applicationDBContext.Drivers.Remove(driver);
             await _applicationDBContext.SaveChangesAsync();
             return driver;

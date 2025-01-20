@@ -25,6 +25,11 @@ namespace ChopDeck.Controllers
             _userManager = userManager;
         }
 
+        /// <summary>
+        /// Get products
+        /// </summary>
+        /// <param name="productsQuery"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetProducts([FromQuery] ProductsQueryObject productsQuery)
         {
@@ -38,6 +43,11 @@ namespace ChopDeck.Controllers
             });
         }
 
+        /// <summary>
+        /// Get product by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetProductByID([FromRoute] int id)
         {
@@ -60,6 +70,11 @@ namespace ChopDeck.Controllers
             });
         }
 
+        /// <summary>
+        /// Add a new product
+        /// </summary>
+        /// <param name="productDto"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> CreateProduct([FromBody] CreateProductDto productDto)
         {
@@ -96,6 +111,12 @@ namespace ChopDeck.Controllers
             }
         }
 
+        /// <summary>
+        /// Update product information
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="updateDto"></param>
+        /// <returns></returns>
         [HttpPatch]
         [Route("{id}")]
         public async Task<IActionResult> UpdateProduct([FromRoute] int id, UpdateProductDto updateDto)
@@ -149,6 +170,11 @@ namespace ChopDeck.Controllers
 
         }
 
+        /// <summary>
+        /// Delete product
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteProduct([FromRoute] int id)

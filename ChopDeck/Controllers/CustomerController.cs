@@ -31,6 +31,11 @@ namespace ChopDeck.Controllers
             _orderRepo = orderRepo;
         }
 
+        /// <summary>
+        /// Create customer account
+        /// </summary>
+        /// <param name="createCustomerDto"></param>
+        /// <returns></returns>
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] CreateCustomerDto createCustomerDto)
         {
@@ -111,6 +116,11 @@ namespace ChopDeck.Controllers
             }
         }
 
+        /// <summary>
+        /// Customer login
+        /// </summary>
+        /// <param name="loginDto"></param>
+        /// <returns></returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
@@ -144,6 +154,11 @@ namespace ChopDeck.Controllers
             });
         }
 
+        /// <summary>
+        /// Fetch customer orders
+        /// </summary>
+        /// <param name="ordersQueryObject"></param>
+        /// <returns></returns>
         [HttpGet("orders")]
         [Authorize]
         public async Task<IActionResult> GetOrders([FromQuery] CustomerOrdersQueryObject ordersQueryObject)
@@ -159,6 +174,11 @@ namespace ChopDeck.Controllers
             });
         }
 
+        /// <summary>
+        /// Fetch customer order by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("orders/{id:int}")]
         [Authorize]
         public async Task<IActionResult> GetCustomerOrderById([FromRoute] int id)
@@ -183,6 +203,11 @@ namespace ChopDeck.Controllers
             });
         }
 
+        /// <summary>
+        /// Delete a customer account
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteCustomer([FromRoute] int id)

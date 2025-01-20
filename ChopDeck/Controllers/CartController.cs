@@ -29,6 +29,10 @@ namespace ChopDeck.Controllers
             _productRepo = productRepo;
         }
 
+        /// <summary>
+        /// Fetch all carts
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetCarts()
         {
@@ -42,6 +46,12 @@ namespace ChopDeck.Controllers
                 Data = mappedCarts
             });
         }
+
+        /// <summary>
+        /// Fetch cart by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
 
         [HttpGet]
         [Route("{id:int}")]
@@ -66,6 +76,11 @@ namespace ChopDeck.Controllers
             });
         }
 
+        /// <summary>
+        /// Delete a cart
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteCart([FromRoute] int id)
@@ -85,7 +100,11 @@ namespace ChopDeck.Controllers
             return NoContent();
         }
 
-
+        /// <summary>
+        /// Add item to cart. Creates cart if no active cart for restaurant
+        /// </summary>
+        /// <param name="addCartItemDto"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("add")]
         public async Task<IActionResult> AddItem([FromBody] AddCartItemDto addCartItemDto)
@@ -150,6 +169,12 @@ namespace ChopDeck.Controllers
 
         }
 
+        /// <summary>
+        /// Remove item from cart
+        /// </summary>
+        /// <param name="cartId"></param>
+        /// <param name="cartItemId"></param>
+        /// <returns></returns>
         [HttpDelete("{cartId:int}/{cartItemId:int}")]
         public async Task<IActionResult> RemoveItem([FromRoute] int cartId, int cartItemId)
         {
@@ -185,6 +210,13 @@ namespace ChopDeck.Controllers
             });
         }
 
+        /// <summary>
+        /// Update cart item quantity
+        /// </summary>
+        /// <param name="cartId"></param>
+        /// <param name="cartItemId"></param>
+        /// <param name="quantityDto"></param>
+        /// <returns></returns>
         [HttpPut("{cartId:int}/{cartItemId:int}")]
         public async Task<IActionResult> UpdateQuantity([FromRoute] int cartId, int cartItemId, [FromBody] UpdateCartItemQuantityDto quantityDto)
         {
@@ -223,6 +255,11 @@ namespace ChopDeck.Controllers
             });
         }
 
+        /// <summary>
+        /// Initiate cart checkout
+        /// </summary>
+        /// <param name="checkoutDto"></param>
+        /// <returns></returns>
         [HttpPost("checkout")]
         public async Task<IActionResult> Checkout([FromBody] CheckoutDto checkoutDto)
         {

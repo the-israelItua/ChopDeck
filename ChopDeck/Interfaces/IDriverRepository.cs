@@ -9,7 +9,7 @@ namespace ChopDeck.Interfaces
         Task<Driver?> GetByEmailAsync(string email);
         Task<Driver> CreateAsync(Driver driver);
         Task<Driver> UpdateAsync(Driver driver);
-        Task<Driver?> DeleteAsync(int id, string userId);
+        Task<Driver?> DeleteAsync(Driver driver);
         Task<bool> DriverEmailExists(string email);
         Task<bool> DriverExists(int id);
     }

@@ -34,6 +34,11 @@ namespace ChopDeck.Controllers
             _orderRepo = orderRepo;
         }
 
+        /// <summary>
+        /// Create driver account
+        /// </summary>
+        /// <param name="createDriverDto"></param>
+        /// <returns></returns>
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] CreateDriverDto createDriverDto)
         {
@@ -118,6 +123,11 @@ namespace ChopDeck.Controllers
             }
         }
 
+        /// <summary>
+        /// Driver login
+        /// </summary>
+        /// <param name="loginDto"></param>
+        /// <returns></returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
@@ -150,18 +160,23 @@ namespace ChopDeck.Controllers
                 Token = _tokenService.CreateToken(driver.ApplicationUser)
             });
         }
-        [HttpGet("{id:int}")]
-        [Authorize]
-        public async Task<IActionResult> GetDriverByID([FromRoute] int id)
-        {
-            var driver = await _driverRepo.GetByIdAsync(id);
 
+       /// <summary>
+       /// Get user details
+       /// </summary>
+       /// <returns></returns>
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetDriverByID()
+        {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var driver = await _driverRepo.GetByEmailAsync(userEmail);
             if (driver == null)
             {
-                return NotFound(new ErrorResponse<string>
+                return Unauthorized(new ErrorResponse<string>
                 {
-                    Status = 404,
-                    Message = "Driver not found."
+                    Status = 401,
+                    Message = "You don't permission to perform this task"
                 });
             }
 
@@ -173,9 +188,15 @@ namespace ChopDeck.Controllers
             });
         }
 
+        /// <summary>
+        /// Update driver details
+        /// </summary>
+        /// <param name="updateDto"></param>
+        /// <returns></returns>
+
         [HttpPatch]
         [Authorize]
-        public async Task<IActionResult> UpdateDriver([FromRoute] int id, UpdateDriverDto updateDto)
+        public async Task<IActionResult> UpdateDriver([FromBody] UpdateDriverDto updateDto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var driver = await _driverRepo.GetByUserIdAsync(userId);
@@ -222,13 +243,16 @@ namespace ChopDeck.Controllers
 
         }
 
+        /// <summary>
+        /// Delete driver account
+        /// </summary>
+        /// <returns></returns>
         [HttpDelete]
-        [Route("{id}")]
         [Authorize]
-        public async Task<IActionResult> DeleteDriver([FromRoute] int id)
+        public async Task<IActionResult> DeleteDriver()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var driver = await _driverRepo.DeleteAsync(id, userId);
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var driver = await _driverRepo.GetByEmailAsync(userEmail);
 
             if (driver == null)
             {
@@ -239,10 +263,17 @@ namespace ChopDeck.Controllers
                 });
             }
 
+            await _driverRepo.DeleteAsync(driver);
+
             return NoContent();
         }
 
-        [HttpGet("/orders")]
+        /// <summary>
+        /// Fetch available orders
+        /// </summary>
+        /// <param name="queryObject"></param>
+        /// <returns></returns>
+        [HttpGet("orders")]
         [Authorize]
         public async Task<IActionResult> GetAvaliableOrders([FromBody] PaginationQueryObject queryObject)
         {
@@ -257,7 +288,12 @@ namespace ChopDeck.Controllers
             }
         }
 
-        [HttpPatch("/order/assign/{orderId:int}")]
+        /// <summary>
+        /// Assign order to driver
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
+        [HttpPatch("order/assign/{orderId:int}")]
         [Authorize]
         public async Task<IActionResult> AssignOrder([FromRoute] int orderId)
         {
@@ -294,7 +330,14 @@ namespace ChopDeck.Controllers
             });
         }
 
-        [HttpPatch("{id:int}")]
+
+        /// <summary>
+        /// Update order status
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="updateDto"></param>
+        /// <returns></returns>
+        [HttpPatch("order/{id:int}")]
         [Authorize]
         public async Task<IActionResult> UpdateOrderStatus([FromRoute] int id, UpdateDriverOrderDto updateDto)
         {

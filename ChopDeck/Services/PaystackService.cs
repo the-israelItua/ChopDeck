@@ -1,6 +1,7 @@
 ﻿using Azure;
 using ChopDeck.Interfaces;
 using ChopDeck.Models;
+using Microsoft.Extensions.Options;
 using System;
 using System.Net.Http;
 using System.Text;
@@ -12,12 +13,13 @@ namespace ChopDeck.Services
     public class PaystackService : IPaystackService
     {
         private readonly HttpClient _httpClient;
-        private readonly IConfiguration _config;
+        private readonly PaystackSettings _paystackSettings;
 
-        public PaystackService(HttpClient httpClient, IConfiguration config)
+        public PaystackService(HttpClient httpClient, IOptions<AppSettings> appSettings)
         {
+            _paystackSettings = appSettings.Value.Paystack;
             _httpClient = httpClient;
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {config["Paystack:Secretkey"]}");
+            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {appSettings.Value.Paystack.SecretKey}");
         }
 
         public async Task<string> InitializeTransactionAsync(string email, decimal amount, string callbackUrl)
@@ -30,7 +32,7 @@ namespace ChopDeck.Services
             };
 
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{_config["Paystack:BaseUrl"]}/transaction/initialize", content);
+            var response = await _httpClient.PostAsync($"{_paystackSettings.BaseUrl}/transaction/initialize", content);
 
             if (response.IsSuccessStatusCode)
             {
@@ -45,7 +47,7 @@ namespace ChopDeck.Services
 
         public async Task<bool> VerifyTransactionAsync(string reference)
         {
-            var response = await _httpClient.GetAsync($"{_config["Paystack:BaseUrl"]}/transaction/verify/{reference}");
+            var response = await _httpClient.GetAsync($"{_paystackSettings.BaseUrl}/transaction/verify/{reference}");
 
             if (response.IsSuccessStatusCode)
             {

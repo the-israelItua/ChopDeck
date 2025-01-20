@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace ChopDeck.Validation
 {
@@ -8,22 +10,35 @@ namespace ChopDeck.Validation
 
         public EnumValueValidationAttribute(Type enumType)
         {
+            _enumType = enumType ?? throw new ArgumentNullException(nameof(enumType));
+
             if (!enumType.IsEnum)
             {
-                throw new ArgumentException("Provided type must be an enum.");
+                throw new ArgumentException("Type must be an enumeration");
             }
-            _enumType = enumType;
         }
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
-            if (value == null || !_enumType.IsEnumDefined(Enum.Parse(_enumType, value.ToString())))
+            if (value == null)
             {
-                return new ValidationResult($"Invalid value. Allowed values are: {string.Join(", ", Enum.GetNames(_enumType))}");
+                return new ValidationResult($"Value is required.");
+            }
+
+            if (value is string stringValue)
+            {
+                bool isValid = Enum.GetNames(_enumType).Contains(stringValue);
+                if (!isValid)
+                {
+                    return new ValidationResult($"Invalid status. Allowed values are: {string.Join(", ", Enum.GetNames(_enumType))}.");
+                }
+            }
+            else
+            {
+                return new ValidationResult($"Invalid input type. Must be a string representing an enum value.");
             }
 
             return ValidationResult.Success;
         }
     }
-
 }

@@ -1,3 +1,4 @@
+using System.Reflection;
 using ChopDeck.Data;
 using ChopDeck.helpers;
 using ChopDeck.Interfaces;
@@ -7,21 +8,21 @@ using ChopDeck.Repository.Restaurants;
 using ChopDeck.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add<ValidationActionFilter>();
-    options.Filters.Add<GlobalExceptionFilter>();
-});
 
 builder.Services.AddSwaggerGen(option =>
 {
     option.SwaggerDoc("v1", new OpenApiInfo { Title = "ChopDeck API", Version = "v1" });
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    option.IncludeXmlComments(xmlPath);
+
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -46,10 +47,16 @@ builder.Services.AddSwaggerGen(option =>
         }
     });
 });
-builder.Services.AddControllers().AddNewtonsoftJson(options =>
+
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidationActionFilter>();
+    options.Filters.Add<GlobalExceptionFilter>();
+}).AddNewtonsoftJson(options =>
 {
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
@@ -94,6 +101,8 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddHttpClient<IPaystackService, PaystackService>();
 builder.Services.AddScoped<RoleService>();
 
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+
 var app = builder.Build();
 
 var scope = app.Services.CreateScope();
@@ -121,3 +130,16 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+//builder.Services.AddControllers(options =>
+//{
+//    options.Filters.Add<ValidationActionFilter>();
+//    options.Filters.Add<GlobalExceptionFilter>();
+//}).AddNewtonsoftJson(options =>
+//{
+//    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+//});
+
+//controller->service class -> repo
+
+//nlog or serilog
