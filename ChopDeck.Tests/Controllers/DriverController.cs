@@ -194,7 +194,7 @@ namespace ChopDeck_Tests.Controllers
 
             A.CallTo(() => _driverRepo.GetByIdAsync(id)).Returns(Task.FromResult<Driver?>(null));
 
-            var result = await _driverController.GetDriverByID(id);
+            var result = await _driverController.GetDriverByID();
             var notFoundResult = result.Should().BeOfType<NotFoundObjectResult>().Which;
             notFoundResult.StatusCode.Should().Be(404);
 
@@ -212,7 +212,7 @@ namespace ChopDeck_Tests.Controllers
             var id = 1;
             var driver = Helpers.CreateDriver();
             A.CallTo(() => _driverRepo.GetByIdAsync(id)).Returns(driver);
-            var result = await _driverController.GetDriverByID(id);
+            var result = await _driverController.GetDriverByID();
 
             var okResult = result.Should().BeOfType<OkObjectResult>().Which;
             okResult.StatusCode.Should().Be(200);
