@@ -2,7 +2,7 @@
 using ChopDeck.Enums;
 using ChopDeck.Validation;
 
-namespace ChopDeck.helpers
+namespace ChopDeck.Helpers
 {
     public class CustomerOrdersQueryObject : PaginationQueryObject
     {

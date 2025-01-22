@@ -1,10 +1,11 @@
 ﻿using ChopDeck.Data;
 using ChopDeck.Enums;
-using ChopDeck.helpers;
+using ChopDeck.Helpers;
 using ChopDeck.Models;
+using ChopDeck.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChopDeck.Repository
+namespace ChopDeck.Repository.Impl
 {
     public class CartRepository : ICartRepository
     {

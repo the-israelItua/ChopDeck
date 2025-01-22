@@ -4,8 +4,9 @@ using ChopDeck.Dtos.Drivers;
 using ChopDeck.Dtos.Orders;
 using ChopDeck.Dtos.Restaurants;
 using ChopDeck.Enums;
-using ChopDeck.helpers;
-using ChopDeck.Interfaces;
+using ChopDeck.Helpers;
+using ChopDeck.Repository.Interfaces;
+using ChopDeck.Services.Interfaces;
 using ChopDeck.Mappers;
 using ChopDeck.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -198,7 +199,7 @@ namespace ChopDeck.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateDriver([FromBody] UpdateDriverDto updateDto)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+   var userId = UserHelper.GetUserId(HttpContext);
             var driver = await _driverRepo.GetByUserIdAsync(userId);
             if (driver == null)
             {
@@ -341,7 +342,7 @@ namespace ChopDeck.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateOrderStatus([FromRoute] int id, UpdateDriverOrderDto updateDto)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+   var userId = UserHelper.GetUserId(HttpContext);
 
             var order = await _orderRepo.GetOrderByIdAsync(id);
             if (order == null || order.Driver.ApplicationUser.Id != userId)

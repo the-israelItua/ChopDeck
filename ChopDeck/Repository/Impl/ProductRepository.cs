@@ -1,10 +1,10 @@
 ﻿using ChopDeck.Data;
-using ChopDeck.helpers;
-using ChopDeck.Interfaces;
+using ChopDeck.Helpers;
 using ChopDeck.Models;
+using ChopDeck.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChopDeck.Repository.Restaurants
+namespace ChopDeck.Repository.Impl
 {
     public class ProductRepository : IProductRepository
     {

@@ -1,6 +1,6 @@
 ﻿using ChopDeck.Models;
 
-namespace ChopDeck.helpers
+namespace ChopDeck.Repository.Interfaces
 {
     public interface ICartRepository
     {

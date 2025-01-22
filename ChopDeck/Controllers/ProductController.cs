@@ -1,7 +1,8 @@
 ﻿using System.Security.Claims;
 using ChopDeck.Dtos.Products;
-using ChopDeck.helpers;
-using ChopDeck.Interfaces;
+using ChopDeck.Helpers;
+using ChopDeck.Repository.Interfaces;
+using ChopDeck.Services.Interfaces;
 using ChopDeck.Mappers;
 using ChopDeck.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -78,7 +79,7 @@ namespace ChopDeck.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateProduct([FromBody] CreateProductDto productDto)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+   var userId = UserHelper.GetUserId(HttpContext);
             var restaurant = await _restaurantRepo.GetByUserIdAsync(userId);
             if (restaurant == null)
             {
@@ -121,7 +122,7 @@ namespace ChopDeck.Controllers
         [Route("{id}")]
         public async Task<IActionResult> UpdateProduct([FromRoute] int id, UpdateProductDto updateDto)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+   var userId = UserHelper.GetUserId(HttpContext);
             var restaurant = await _restaurantRepo.GetByUserIdAsync(userId);
             if (restaurant == null)
             {
@@ -179,7 +180,7 @@ namespace ChopDeck.Controllers
         [Route("{id}")]
         public async Task<IActionResult> DeleteProduct([FromRoute] int id)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+   var userId = UserHelper.GetUserId(HttpContext);
             var product = await _productRepo.DeleteAsync(id);
 
             if (product == null)

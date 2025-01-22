@@ -1,4 +1,4 @@
-﻿namespace ChopDeck.Interfaces
+﻿namespace ChopDeck.Services.Interfaces
 {
     public interface IPaystackService
     {

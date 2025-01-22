@@ -1,13 +1,13 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using ChopDeck.Interfaces;
+using ChopDeck.Services.Interfaces;
 using ChopDeck.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 
-namespace ChopDeck.Services
+namespace ChopDeck.Services.Impl
 {
     public class TokenService : ITokenService
     {

@@ -1,7 +1,7 @@
-﻿using ChopDeck.Interfaces;
+﻿using ChopDeck.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
-namespace ChopDeck.Services
+namespace ChopDeck.Services.Impl
 {
     public class RoleService : IRoleService
     {

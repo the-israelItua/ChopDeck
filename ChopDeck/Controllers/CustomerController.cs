@@ -3,8 +3,9 @@ using ChopDeck.Models;
 using ChopDeck.Dtos;
 using ChopDeck.Dtos.Customers;
 using ChopDeck.Dtos.Orders;
-using ChopDeck.helpers;
-using ChopDeck.Interfaces;
+using ChopDeck.Helpers;
+using ChopDeck.Repository.Interfaces;
+using ChopDeck.Services.Interfaces;
 using ChopDeck.Mappers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -163,7 +164,7 @@ namespace ChopDeck.Controllers
         [Authorize]
         public async Task<IActionResult> GetOrders([FromQuery] CustomerOrdersQueryObject ordersQueryObject)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+   var userId = UserHelper.GetUserId(HttpContext);
             var orders = await _orderRepo.GetCustomerOrdersAsync(userId, ordersQueryObject);
             var mappedOrders = orders.Select(s => s.ToOrderDto()).ToList();
             return Ok(new ApiResponse<List<OrderDto>>
@@ -183,7 +184,7 @@ namespace ChopDeck.Controllers
         [Authorize]
         public async Task<IActionResult> GetCustomerOrderById([FromRoute] int id)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+   var userId = UserHelper.GetUserId(HttpContext);
             var order = await _orderRepo.GetCustomerOrderByIdAsync(id, userId);
 
             if (order == null)
@@ -212,7 +213,7 @@ namespace ChopDeck.Controllers
         [Route("{id}")]
         public async Task<IActionResult> DeleteCustomer([FromRoute] int id)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = UserHelper.GetUserId(HttpContext);
             var customer = await _customerRepo.DeleteAsync(id, userId);
 
             if (customer == null)

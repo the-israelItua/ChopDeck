@@ -1,5 +1,5 @@
 ﻿using Azure;
-using ChopDeck.Interfaces;
+using ChopDeck.Services.Interfaces;
 using ChopDeck.Models;
 using Microsoft.Extensions.Options;
 using System;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace ChopDeck.Services
+namespace ChopDeck.Services.Impl
 {
     public class PaystackService : IPaystackService
     {

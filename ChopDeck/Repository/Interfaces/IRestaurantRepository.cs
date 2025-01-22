@@ -1,7 +1,7 @@
-﻿using ChopDeck.helpers;
+﻿using ChopDeck.Helpers;
 using ChopDeck.Models;
 
-namespace ChopDeck.Interfaces
+namespace ChopDeck.Repository.Interfaces
 {
     public interface IRestaurantRepository
     {

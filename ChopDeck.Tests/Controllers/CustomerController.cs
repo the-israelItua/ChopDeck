@@ -1,13 +1,14 @@
 ﻿using ChopDeck.Controllers;
 using ChopDeck.Dtos.Customers;
 using ChopDeck.Dtos;
-using ChopDeck.Interfaces;
+using ChopDeck.Repository.Interfaces;
+using ChopDeck.Services.Interfaces;
 using ChopDeck.Models;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using ChopDeck.helpers;
+using ChopDeck.Helpers;
 using ChopDeck.Dtos.Orders;
 
 namespace ChopDeck_Tests.Controllers

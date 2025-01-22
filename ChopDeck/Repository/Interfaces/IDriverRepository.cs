@@ -1,6 +1,6 @@
 ﻿using ChopDeck.Models;
 
-namespace ChopDeck.Interfaces
+namespace ChopDeck.Repository.Interfaces
 {
     public interface IDriverRepository
     {

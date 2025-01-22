@@ -1,9 +1,9 @@
 ﻿using ChopDeck.Data;
-using ChopDeck.Interfaces;
+using ChopDeck.Repository.Interfaces;
 using ChopDeck.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChopDeck.Repository
+namespace ChopDeck.Repository.Impl
 {
     public class CustomerRepository : ICustomerRepository
     {

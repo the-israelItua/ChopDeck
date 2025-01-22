@@ -3,8 +3,9 @@ using ChopDeck.Dtos;
 using ChopDeck.Dtos.Orders;
 using ChopDeck.Dtos.Restaurants;
 using ChopDeck.Enums;
-using ChopDeck.helpers;
-using ChopDeck.Interfaces;
+using ChopDeck.Helpers;
+using ChopDeck.Repository.Interfaces;
+using ChopDeck.Services.Interfaces;
 using ChopDeck.Mappers;
 using ChopDeck.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -216,7 +217,7 @@ namespace ChopDeck.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateRestaurant([FromBody] UpdateRestaurantDto updateDto)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+   var userId = UserHelper.GetUserId(HttpContext);
             var restaurant = await _restaurantRepo.GetByUserIdAsync(userId);
             if (restaurant == null)
             {
@@ -270,7 +271,7 @@ namespace ChopDeck.Controllers
         [Authorize]
         public async Task<IActionResult> GetRestaurantOrders([FromQuery] RestaurantOrdersQueryObject queryObject)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+   var userId = UserHelper.GetUserId(HttpContext);
             var orders = await _orderRepo.GetRestaurantOrdersAsync(userId, queryObject);
             return Ok(new ApiResponse<List<RestaurantOrderListDto>>
             {
@@ -289,7 +290,7 @@ namespace ChopDeck.Controllers
         [Authorize]
         public async Task<IActionResult> GetRestaurantOrderById([FromRoute] int id)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+   var userId = UserHelper.GetUserId(HttpContext);
             var order = await _orderRepo.GetRestaurantOrderByIdAsync(id, userId);
 
             if (order == null)
@@ -319,7 +320,7 @@ namespace ChopDeck.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateOrderStatus([FromRoute] int id, UpdateRestaurantOrderDto updateDto)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+   var userId = UserHelper.GetUserId(HttpContext);
 
             var order = await _orderRepo.GetOrderByIdAsync(id);
             if (order == null || order.Restaurant.ApplicationUser.Id != userId)
@@ -357,7 +358,7 @@ namespace ChopDeck.Controllers
         [Route("{id}")]
         public async Task<IActionResult> DeleteRestaurant([FromRoute] int id)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+   var userId = UserHelper.GetUserId(HttpContext);
             var restaurant = await _restaurantRepo.DeleteAsync(id, userId);
 
             if (restaurant == null)

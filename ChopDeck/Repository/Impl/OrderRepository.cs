@@ -2,13 +2,13 @@
 using ChopDeck.Dtos.Orders;
 using ChopDeck.Dtos.Restaurants;
 using ChopDeck.Enums;
-using ChopDeck.helpers;
-using ChopDeck.Interfaces;
+using ChopDeck.Helpers;
 using ChopDeck.Mappers;
 using ChopDeck.Models;
+using ChopDeck.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChopDeck.Repository
+namespace ChopDeck.Repository.Impl
 {
     public class OrderRepository : IOrderRepository
     {

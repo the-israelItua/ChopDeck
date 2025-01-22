@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using ChopDeck.Enums;
 
-namespace ChopDeck.helpers
+namespace ChopDeck.Helpers
 {
     public class RestaurantOrdersQueryObject : PaginationQueryObject
     {

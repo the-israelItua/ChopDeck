@@ -1,11 +1,12 @@
 using System.Reflection;
 using ChopDeck.Data;
-using ChopDeck.helpers;
-using ChopDeck.Interfaces;
+using ChopDeck.Helpers;
 using ChopDeck.Models;
-using ChopDeck.Repository;
-using ChopDeck.Repository.Restaurants;
+using ChopDeck.Repository.Impl;
+using ChopDeck.Repository.Interfaces;
 using ChopDeck.Services;
+using ChopDeck.Services.Impl;
+using ChopDeck.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -100,15 +101,19 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddHttpClient<IPaystackService, PaystackService>();
+builder.Services.AddScoped<RoleService>();
+
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IDriverRepository, DriverRepository>();
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddHttpClient<IPaystackService, PaystackService>();
-builder.Services.AddScoped<RoleService>();
+
+
 
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
@@ -139,16 +144,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-//builder.Services.AddControllers(options =>
-//{
-//    options.Filters.Add<ValidationActionFilter>();
-//    options.Filters.Add<GlobalExceptionFilter>();
-//}).AddNewtonsoftJson(options =>
-//{
-//    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-//});
-
-//controller->service class -> repo
-
-//nlog or serilog
