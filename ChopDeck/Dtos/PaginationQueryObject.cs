@@ -1,4 +1,4 @@
-﻿namespace ChopDeck.Helpers
+﻿namespace ChopDeck.Dtos
 {
     public class PaginationQueryObject
     {

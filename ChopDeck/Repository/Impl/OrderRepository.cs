@@ -1,8 +1,9 @@
 ﻿using ChopDeck.Data;
 using ChopDeck.Dtos.Orders;
 using ChopDeck.Dtos.Restaurants;
+using ChopDeck.Dtos.Customers;
 using ChopDeck.Enums;
-using ChopDeck.Helpers;
+using ChopDeck.Dtos;
 using ChopDeck.Mappers;
 using ChopDeck.Models;
 using ChopDeck.Repository.Interfaces;
@@ -106,7 +107,7 @@ namespace ChopDeck.Repository.Impl
             return await orders.Skip(skipNumber).Take(queryObject.PageSize).ToListAsync();
         }
 
-        public async Task<Order?> GetOrderByIdAsync(int id, string userId)
+        public async Task<Order?> GetCustomerOrderByIdAsync(int id, string userId)
         {
             return await _applicationDBContext.Orders.Include(c => c.OrderItems!).ThenInclude(c => c.Product).Include(c => c.Restaurant).ThenInclude(c => c.ApplicationUser).Include(c => c.Customer!).ThenInclude(c => c.ApplicationUser).FirstOrDefaultAsync(s => s.Id == id && s.Customer.ApplicationUserId == userId);
         }

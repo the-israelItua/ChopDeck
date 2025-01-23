@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ChopDeck.Helpers
+namespace ChopDeck.Dtos.Products
 {
     public class ProductsQueryObject : PaginationQueryObject
     {

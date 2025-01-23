@@ -1,15 +1,8 @@
-﻿using System.Security.Claims;
-using ChopDeck.Models;
-using ChopDeck.Dtos;
+﻿using ChopDeck.Dtos;
 using ChopDeck.Dtos.Customers;
-using ChopDeck.Dtos.Orders;
 using ChopDeck.Helpers;
-using ChopDeck.Repository.Interfaces;
 using ChopDeck.Services.Interfaces;
-using ChopDeck.Mappers;
-using ChopDeck.Helpers;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChopDeck.Controllers
@@ -72,7 +65,7 @@ namespace ChopDeck.Controllers
         public async Task<IActionResult> GetOrderById([FromRoute] int id)
         {
             var userId = UserHelper.GetUserId(HttpContext);
-            var response = await _customerService.GetOrderByIdAsync(ordersQueryObject, userId);
+            var response = await _customerService.GetOrderByIdAsync(id, userId);
             return ResponseHelper.HandleResponse(response);
         }
 
@@ -86,7 +79,7 @@ namespace ChopDeck.Controllers
         public async Task<IActionResult> DeleteCustomer([FromRoute] int id)
         {
             var userId = UserHelper.GetUserId(HttpContext);
-            var response = await _customerService.DeleteCustomerasyncAsync(ordersQueryObject, userId);
+            var response = await _customerService.DeleteCustomerAsync(id, userId);
             return ResponseHelper.HandleResponse(response);
         }
 

@@ -1,9 +1,12 @@
-using ChopDeck.Dtos.Carts;
+using System.Security.Claims;
+using ChopDeck.Dtos;
+using ChopDeck.Dtos.Customers;
+using ChopDeck.Dtos.Orders;
 using ChopDeck.Repository.Interfaces;
-using ChopDeck.Models;
 using ChopDeck.Services.Interfaces;
 using ChopDeck.Mappers;
-using ChopDeck.Dtos.Orders;
+using ChopDeck.Models;
+using Microsoft.AspNetCore.Identity;
 using Serilog;
 
 
@@ -24,13 +27,13 @@ namespace ChopDeck.Services.Impl{
             _orderRepo = orderRepo;
         }
 
-        public async Task<ApiResponse<CustomerDto>> RegisterAsync(CreateCustomerDto createDto){
+        public async Task<ApiResponse<CustomerDto>> RegisterAsync(CreateCustomerDto createCustomerDto){
             try
             {
                 var existingCustomer = await _customerRepo.CustomerEmailExists(createCustomerDto.Email);
                 if (existingCustomer)
                 {
-                    return new ApiResponse<CustomerDto>{ Status = 409, Message = "A customer with this email already exists." });
+                    return new ApiResponse<CustomerDto>{ Status = 409, Message = "A customer with this email already exists." };
                 }
 
                 var applicationUser = new ApplicationUser
@@ -69,12 +72,13 @@ namespace ChopDeck.Services.Impl{
                     else
                     {
                         var roleErrors = roleResult.Errors.Select(e => e.Description).ToList();
-                        Log.Error(roleErrors, "An error occured");
+
+                        Log.Error("An error occurred while assigning roles: {@RoleErrors}", roleErrors);
+
                         return new ApiResponse<CustomerDto>
                         {
                             Status = 500,
                             Message = "Failed to assign role",
-                            Data = roleErrors
                         };
                     }
                 }
@@ -84,12 +88,11 @@ namespace ChopDeck.Services.Impl{
                         .Where(e => !e.Description.Contains("Username", StringComparison.OrdinalIgnoreCase))
                         .Select(e => e.Description)
                         .ToList();
-                     Log.Error(creationErrors, "An error occured");
+                     Log.Error("An error occurred while assigning roles: {@CreationErrors}", "An error occured");
                     return new ApiResponse<CustomerDto>
                     {
                         Status = 500,
                         Message = "Failed to create user",
-                        Data = creationErrors
                     };
                 }
             }
@@ -100,7 +103,6 @@ namespace ChopDeck.Services.Impl{
                 {
                     Status = 500,
                     Message = "An unexpected error occurred",
-                    Data = e.Message
                 };
             }
         }
@@ -110,7 +112,7 @@ namespace ChopDeck.Services.Impl{
             var customer = await _customerRepo.GetByEmailAsync(loginDto.Email);
             if (customer == null)
             {
-                return new <ApiResponse<CustomerDto>>
+                return new ApiResponse<CustomerDto>
                 {
                     Status = 401,
                     Message = "Email or password incorrect"
@@ -121,14 +123,14 @@ namespace ChopDeck.Services.Impl{
 
             if (!passwordCheck.Succeeded)
             {
-             return new <ApiResponse<CustomerDto>>
+             return new ApiResponse<CustomerDto>
                 {
                     Status = 401,
                     Message = "Email or password incorrect"
                 };
             }
 
-            return new <ApiResponse<CustomerDto>>
+            return new ApiResponse<CustomerDto>
             {
                 Status = 201,
                 Message = "Login successfully.",
@@ -148,7 +150,7 @@ namespace ChopDeck.Services.Impl{
 
         public async Task<ApiResponse<List<OrderDto>>> GetOrdersAsync(CustomerOrdersQueryObject ordersQuery, string userId){
            try{
-             var orders = await _orderRepo.GetCustomerOrdersAsync(userId, ordersQueryObject);
+             var orders = await _orderRepo.GetCustomerOrdersAsync(userId, ordersQuery);
             var mappedOrders = orders.Select(s => s.ToOrderDto()).ToList();
             return new ApiResponse<List<OrderDto>>
             {
@@ -159,7 +161,7 @@ namespace ChopDeck.Services.Impl{
            }catch (Exception e)
             {
                 Log.Error(e, "An error occured");
-                return new ApiResponse<CustomerDto>
+                return new ApiResponse<List<OrderDto>>
                 {
                     Status = 500,
                     Message = "An error occurred while processing your request.",
@@ -169,18 +171,18 @@ namespace ChopDeck.Services.Impl{
 
         public async Task<ApiResponse<OrderDto>> GetOrderByIdAsync(int id, string userId){
            try{
-            var order = await _orderRepo.GetOrderByIdAsync(id, userId);
+            var order = await _orderRepo.GetCustomerOrderByIdAsync(id, userId);
 
             if (order == null)
             {
-                return <ApiResponse<OrderDto>> 
+                return new ApiResponse<OrderDto>
                 {
                     Status = 404,
                     Message = "Order not found"
                 };
             }
 
-            return <ApiResponse<OrderDto>> 
+            return new ApiResponse<OrderDto>
             {
                 Status = 200,
                 Message = "Order fetched successfully",
@@ -189,37 +191,7 @@ namespace ChopDeck.Services.Impl{
            }catch (Exception e)
             {
                 Log.Error(e, "An error occured");
-                return new <ApiResponse<OrderDto>> 
-                {
-                    Status = 500,
-                    Message = "An error occurred while processing your request.",
-                };
-            }
-        }
-
-        public async Task<ApiResponse<OrderDto>> DeleteCustomerAsync(int id, string userId){
-           try{
-            var order = await _orderRepo.GetOrderByIdAsync(id, userId);
-
-            if (order == null)
-            {
-                return <ApiResponse<OrderDto>> 
-                {
-                    Status = 404,
-                    Message = "Order not found"
-                };
-            }
-
-            return <ApiResponse<OrderDto>> 
-            {
-                Status = 200,
-                Message = "Order fetched successfully",
-                Data = order.ToOrderDto()
-            };
-           }catch (Exception e)
-            {
-                Log.Error(e, "An error occured");
-                return new <ApiResponse<OrderDto>> 
+                return new ApiResponse<OrderDto>
                 {
                     Status = 500,
                     Message = "An error occurred while processing your request.",
@@ -233,7 +205,7 @@ namespace ChopDeck.Services.Impl{
 
                 if (customer == null)
                 {
-                    return new <ApiResponse<string>>
+                    return new ApiResponse<string>
                     {
                         Status = 404,
                         Message = "Customer not found."
@@ -243,13 +215,13 @@ namespace ChopDeck.Services.Impl{
                  return new ApiResponse<string>
                 {
                     Status = 204,
-                    Message = 'Customer account deleted.'
+                    Message = "Customer account deleted."
                 };
                 
             }catch (Exception e)
             {
                 Log.Error(e, "An error occured");
-                return new <ApiResponse<OrderDto>> 
+                return new ApiResponse<string>
                 {
                     Status = 500,
                     Message = "An error occurred while processing your request.",

@@ -1,5 +1,5 @@
 ﻿using ChopDeck.Data;
-using ChopDeck.Helpers;
+using ChopDeck.Dtos.Restaurants;
 using ChopDeck.Models;
 using ChopDeck.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;

@@ -1,4 +1,4 @@
-﻿using ChopDeck.Helpers;
+﻿using ChopDeck.Dtos.Restaurants;
 using ChopDeck.Models;
 
 namespace ChopDeck.Repository.Interfaces

@@ -1,4 +1,4 @@
-﻿namespace ChopDeck.Helpers
+﻿namespace ChopDeck.Dtos.Restaurants
 {
     public class RestaurantQueryObject : PaginationQueryObject
     {
