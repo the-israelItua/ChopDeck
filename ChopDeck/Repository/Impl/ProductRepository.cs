@@ -47,9 +47,9 @@ namespace ChopDeck.Repository.Impl
             return product;
         }
 
-        public async Task<Product?> DeleteAsync(int id)
+        public async Task<Product?> DeleteAsync(int id, string userId)
         {
-            var product = await _applicationDBContext.Products.FirstOrDefaultAsync(s => s.Id == id);
+            var product = await _applicationDBContext.Products.Include(c => c.Restaurant).FirstOrDefaultAsync(s => s.Id == id && s.Restaurant.ApplicationUserId == userId);
             if (product == null)
             {
                 return null;

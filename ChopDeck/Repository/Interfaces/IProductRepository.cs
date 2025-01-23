@@ -9,6 +9,6 @@ namespace ChopDeck.Repository.Interfaces
         Task<Product?> GetByIdAsync(int id);
         Task<Product> CreateAsync(Product product);
         Task<Product> UpdateAsync(Product product);
-        Task<Product?> DeleteAsync(int id);
+        Task<Product?> DeleteAsync(int id, string userId);
     }
 }
