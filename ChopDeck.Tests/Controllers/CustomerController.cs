@@ -214,8 +214,8 @@ namespace ChopDeck_Tests.Controllers
             var userId = "1234";
             Helpers.SetUser(_customerController, userId);
             var id = 1;
-            A.CallTo(() => _orderRepo.GetCustomerOrderByIdAsync(id, userId)).Returns(Task.FromResult<Order?>(null));
-            var result = await _customerController.GetCustomerOrderById(id);
+            A.CallTo(() => _orderRepo.GetOrderByIdAsync(id, userId)).Returns(Task.FromResult<Order?>(null));
+            var result = await _customerController.GetOrderById(id);
             var notFoundResult = result.Should().BeOfType<NotFoundObjectResult>().Which;
             notFoundResult.StatusCode.Should().Be(404);
 
@@ -232,8 +232,8 @@ namespace ChopDeck_Tests.Controllers
             Helpers.SetUser(_customerController, userId);
             var id = 1;
             var order = new Order { Id = 1, CustomerId = 1, Customer = Helpers.CreateCustomer(), Restaurant = Helpers.CreateRestaurant(), Driver = Helpers.CreateDriver(), TotalAmount = 100, Amount = 100, DeliveryFee = 20, ServiceCharge = 10 };
-            A.CallTo(() => _orderRepo.GetCustomerOrderByIdAsync(id, userId)).Returns(order);
-            var result = await _customerController.GetCustomerOrderById(id);
+            A.CallTo(() => _orderRepo.GetOrderByIdAsync(id, userId)).Returns(order);
+            var result = await _customerController.GetOrderById(id);
 
             var okResult = result.Should().BeOfType<OkObjectResult>().Which;
             okResult.StatusCode.Should().Be(200);
