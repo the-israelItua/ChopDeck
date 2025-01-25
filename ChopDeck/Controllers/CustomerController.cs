@@ -40,7 +40,6 @@ namespace ChopDeck.Controllers
             var response = await _customerService.LoginAsync(loginDto);
             return ResponseHelper.HandleResponse(response);
         }
-
         /// <summary>
         /// Fetch customer orders
         /// </summary>
