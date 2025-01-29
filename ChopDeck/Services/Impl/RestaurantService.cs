@@ -6,8 +6,10 @@ using ChopDeck.Mappers;
 using ChopDeck.Models;
 using ChopDeck.Repository.Interfaces;
 using ChopDeck.Services.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
+using ChopDeck.Helpers;
 
 namespace ChopDeck.Services.Impl
 {
@@ -18,13 +20,15 @@ namespace ChopDeck.Services.Impl
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IRestaurantRepository _restaurantRepo;
         private readonly IOrderRepository _orderRepo;
-        public RestaurantService(UserManager<ApplicationUser> userManager, ITokenService tokenService, SignInManager<ApplicationUser> signInManager, IRestaurantRepository restaurantRepo, IOrderRepository orderRepo)
+        private readonly IMemoryCache _cache;
+        public RestaurantService(UserManager<ApplicationUser> userManager, ITokenService tokenService, SignInManager<ApplicationUser> signInManager, IRestaurantRepository restaurantRepo, IOrderRepository orderRepo, IMemoryCache cache)
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _signInManager = signInManager;
             _restaurantRepo = restaurantRepo;
             _orderRepo = orderRepo;
+            _cache = cache;
         }
         public async Task<ApiResponse<RestaurantDto>> UpdateRestaurantAsync(UpdateRestaurantDto updateDto, string userId)
         {
@@ -151,13 +155,22 @@ namespace ChopDeck.Services.Impl
         public async Task<ApiResponse<List<RestaurantDto>>> GetRestaurantsAsync(RestaurantQueryObject queryObject)
         {
             try{
-                var restaurants = await _restaurantRepo.GetAsync(queryObject);
-                var mappedRestaurants = restaurants.Select(r => r.ToRestaurantDto()).ToList();
+                string cacheKey = $"restaurants_{queryObject.Name}_{queryObject.PageSize}_{queryObject.PageNumber}";
+
+                if (!_cache.TryGetValue(cacheKey, out List<RestaurantDto>? cachedRestaurants))
+                {
+                    var restaurants = await _restaurantRepo.GetAsync(queryObject);
+                    cachedRestaurants = restaurants.Select(r => r.ToRestaurantDto()).ToList();
+
+                    var cacheOptions = CacheHelper.GetCacheOptions();
+                    _cache.Set(cacheKey, cachedRestaurants, cacheOptions);
+                }
+
                 return new ApiResponse<List<RestaurantDto>>
                 {
                     Status = 200,
                     Message = "Restaurant fetched successfully",
-                    Data = mappedRestaurants
+                    Data = cachedRestaurants
                 };
             }
             catch (Exception e)

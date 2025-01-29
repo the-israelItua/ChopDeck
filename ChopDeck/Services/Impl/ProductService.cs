@@ -1,11 +1,10 @@
-﻿using ChopDeck.Dtos.Orders;
-using ChopDeck.Dtos.Products;
+﻿using ChopDeck.Dtos.Products;
 using ChopDeck.Helpers;
 using ChopDeck.Mappers;
 using ChopDeck.Models;
 using ChopDeck.Repository.Interfaces;
 using ChopDeck.Services.Interfaces;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Memory;
 using Serilog;
 
 namespace ChopDeck.Services.Impl
@@ -14,12 +13,12 @@ namespace ChopDeck.Services.Impl
     {
         private readonly IProductRepository _productRepo;
         private readonly IRestaurantRepository _restaurantRepo;
-        private readonly UserManager<ApplicationUser> _userManager;
-        public ProductService(IProductRepository productRepo, IRestaurantRepository restaurantRepo, UserManager<ApplicationUser> userManager)
+        private readonly IMemoryCache _cache;
+        public ProductService(IProductRepository productRepo, IRestaurantRepository restaurantRepo, IMemoryCache cache)
         {
             _productRepo = productRepo;
             _restaurantRepo = restaurantRepo;
-            _userManager = userManager;
+            _cache = cache;
         }
         public async Task<ApiResponse<ProductDto>> CreateProductAsync(CreateProductDto productDto, string userId)
         {
@@ -127,13 +126,24 @@ namespace ChopDeck.Services.Impl
         {
             try
             {
-                var products = await _productRepo.GetProductsAsync(productsQuery);
-                var mappedProducts = products.Select(s => s.ToProductDto()).ToList();
+                var cacheKey = $"products_{productsQuery.RestaurantId}_{productsQuery.Name}_{productsQuery.PageNumber}_{productsQuery.PageSize}";
+                
+                if(!_cache.TryGetValue(cacheKey, out List<ProductDto>? cachedProducts))
+                {
+                    var products = await _productRepo.GetProductsAsync(productsQuery);
+                    cachedProducts = products.Select(s => s.ToProductDto()).ToList();
+
+
+                    var cacheOptions = CacheHelper.GetCacheOptions();
+
+                    _cache.Set(cacheKey, cachedProducts, cacheOptions);
+                }
+           
                 return new ApiResponse<List<ProductDto>>
                 {
                     Status = 200,
                     Message = "Products fetched successfully",
-                    Data = mappedProducts
+                    Data = cachedProducts
                 };
             }
             catch (Exception e)
@@ -150,7 +160,8 @@ namespace ChopDeck.Services.Impl
         public async Task<ApiResponse<ProductDto>> UpdateProductAsync(int id, UpdateProductDto updateDto, string userId)
         {
             try
-            {
+            {   
+
                 var restaurant = await _restaurantRepo.GetByUserIdAsync(userId);
                 if (restaurant == null)
                 {

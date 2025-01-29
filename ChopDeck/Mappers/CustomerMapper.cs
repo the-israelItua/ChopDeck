@@ -18,6 +18,7 @@ namespace ChopDeck.Mappers
                 UserType = customer.ApplicationUser.UserType,
                 Name = customer.ApplicationUser.Name,
                 Address = customer.ApplicationUser.Address,
+                Email = customer.ApplicationUser.Email,
                 Lga = customer.ApplicationUser.Lga,
                 State = customer.ApplicationUser.State,
                 CreatedAt = customer.ApplicationUser.CreatedAt,

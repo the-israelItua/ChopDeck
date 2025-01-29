@@ -1,15 +1,13 @@
+using System.Configuration;
 using System.Reflection;
 using ChopDeck.Data;
-using ChopDeck.Helpers;
 using ChopDeck.Models;
 using ChopDeck.Repository.Impl;
 using ChopDeck.Repository.Interfaces;
-using ChopDeck.Services;
 using ChopDeck.Services.Impl;
 using ChopDeck.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -25,6 +23,17 @@ Log.Logger = new LoggerConfiguration()
 
 
 builder.Host.UseSerilog();
+
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
+
+if (appSettings == null)
+{
+    throw new InvalidOperationException("AppSettings configuration is missing or incorrect.");
+}
+
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
 builder.Services.AddSwaggerGen(option =>
 {
@@ -91,12 +100,12 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["JWT:Issuer"],
+        ValidIssuer = appSettings.JWT.Issuer,
         ValidateAudience = true,
-        ValidAudience = builder.Configuration["JWT:Audience"],
+        ValidAudience = appSettings.JWT.Audience,
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(
-            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"])
+            System.Text.Encoding.UTF8.GetBytes(appSettings.JWT.SigningKey)
         )
     };
 });
@@ -117,8 +126,7 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IDriverRepository, DriverRepository>();
 
 
-
-builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 

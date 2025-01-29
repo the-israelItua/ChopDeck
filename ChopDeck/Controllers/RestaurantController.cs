@@ -1,9 +1,9 @@
-﻿using ChopDeck.Dtos;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using ChopDeck.Dtos;
 using ChopDeck.Dtos.Restaurants;
 using ChopDeck.Helpers;
 using ChopDeck.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ChopDeck.Controllers
 {
@@ -11,6 +11,7 @@ namespace ChopDeck.Controllers
     [Route("api/restaurant")]
     public class RestaurantController : ControllerBase
     {
+
 
         private readonly IRestaurantService _restaurantService;
         public RestaurantController(IRestaurantService restaurantService)
