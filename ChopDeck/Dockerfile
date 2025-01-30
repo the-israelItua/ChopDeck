@@ -6,7 +6,7 @@ EXPOSE 80
 # Use SDK image to build app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["ChopDeck.csproj", "/"]
+COPY ["ChopDeck.csproj", "./"]
 RUN dotnet restore "ChopDeck.csproj"
 COPY . .
 WORKDIR "/src/ChopDeck"
@@ -18,7 +18,7 @@ RUN dotnet publish "ChopDeck.csproj" -c Release -o /app/publish
 # Copy published app to base image
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=publish /app/publish 
 
 # Start the app
 ENTRYPOINT ["dotnet", "ChopDeck.dll"]
