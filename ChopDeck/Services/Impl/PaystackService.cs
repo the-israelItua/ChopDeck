@@ -13,13 +13,11 @@ namespace ChopDeck.Services.Impl
     public class PaystackService : IPaystackService
     {
         private readonly HttpClient _httpClient;
-        private readonly PaystackSettings _paystackSettings;
 
-        public PaystackService(HttpClient httpClient, IOptions<AppSettings> appSettings)
+        public PaystackService(HttpClient httpClient)
         {
-            _paystackSettings = appSettings.Value.Paystack;
             _httpClient = httpClient;
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {appSettings.Value.Paystack.SecretKey}");
+            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {Environment.GetEnvironmentVariable("PS_SECRETKEY")}");
         }
 
         public async Task<string> InitializeTransactionAsync(string email, decimal amount, string callbackUrl)
@@ -32,7 +30,7 @@ namespace ChopDeck.Services.Impl
             };
 
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync($"{_paystackSettings.BaseUrl}/transaction/initialize", content);
+            var response = await _httpClient.PostAsync($"{Environment.GetEnvironmentVariable("PS_BASEURL")}/transaction/initialize", content);
 
             if (response.IsSuccessStatusCode)
             {
@@ -47,7 +45,7 @@ namespace ChopDeck.Services.Impl
 
         public async Task<bool> VerifyTransactionAsync(string reference)
         {
-            var response = await _httpClient.GetAsync($"{_paystackSettings.BaseUrl}/transaction/verify/{reference}");
+            var response = await _httpClient.GetAsync($"{Environment.GetEnvironmentVariable("PS_BASEURL")}/transaction/verify/{reference}");
 
             if (response.IsSuccessStatusCode)
             {

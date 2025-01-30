@@ -11,17 +11,10 @@ namespace ChopDeck.Services.Impl
 {
     public class TokenService : ITokenService
     {
-        private readonly JwtSettings _jwtSettings;
         private readonly SymmetricSecurityKey _key;
-        public TokenService(IOptions<AppSettings> appSettings)
+        public TokenService()
         {
-            Console.WriteLine($"Issuer: {appSettings.Value.JWT.Issuer}");
-            Console.WriteLine($"Audience: {appSettings.Value.JWT.Audience}");
-            Console.WriteLine($"SigningKey: {appSettings.Value.JWT.SigningKey}");
-            _jwtSettings = appSettings.Value.JWT;
-            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SigningKey));
-
-        
+            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SIGNINGKEY")));
         }
 
         public string CreateToken(ApplicationUser user)
@@ -41,8 +34,8 @@ namespace ChopDeck.Services.Impl
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddDays(7),
                 SigningCredentials = creds,
-                Issuer =  _jwtSettings.Issuer,
-                Audience = _jwtSettings.Audience
+                Issuer = Environment.GetEnvironmentVariable("JWT_ISSUER"),
+                Audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
             };
             
 

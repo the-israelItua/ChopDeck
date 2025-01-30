@@ -12,6 +12,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using DotNetEnv;
+
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,17 +26,6 @@ Log.Logger = new LoggerConfiguration()
 
 
 builder.Host.UseSerilog();
-
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
-var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
-
-if (appSettings == null)
-{
-    throw new InvalidOperationException("AppSettings configuration is missing or incorrect.");
-}
-
-builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
 builder.Services.AddSwaggerGen(option =>
 {
@@ -79,7 +71,7 @@ builder.Services.AddControllers(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseSqlServer(Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"));
 });
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -100,12 +92,12 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
-        ValidIssuer = appSettings.JWT.Issuer,
+        ValidIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER"),
         ValidateAudience = true,
-        ValidAudience = appSettings.JWT.Audience,
+        ValidAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE"),
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(
-            System.Text.Encoding.UTF8.GetBytes(appSettings.JWT.SigningKey)
+            System.Text.Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SIGNINGKEY"))
         )
     };
 });
