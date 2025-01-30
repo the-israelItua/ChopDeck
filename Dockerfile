@@ -6,7 +6,7 @@ EXPOSE 80
 # Use SDK image to build app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["ChopDeck.csproj", "/"]
+COPY ["ChopDeck/ChopDeck.csproj", "ChopDeck/"]
 RUN dotnet restore "ChopDeck/ChopDeck.csproj"
 COPY . .
 WORKDIR "/src/ChopDeck"
