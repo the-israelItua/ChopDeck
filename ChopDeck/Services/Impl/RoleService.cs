@@ -14,16 +14,30 @@ namespace ChopDeck.Services.Impl
 
         public async Task CreateRolesAsync()
         {
-            var roles = new[] { "RESTAURANT", "CUSTOMER", "DRIVER" };
-
-            foreach (var role in roles)
+            try
             {
-                var roleExist = await _roleManager.RoleExistsAsync(role);
-                if (!roleExist)
+                var roles = new[] { "RESTAURANT", "CUSTOMER", "DRIVER" };
+
+                foreach (var role in roles)
                 {
-                    await _roleManager.CreateAsync(new IdentityRole(role));
+                    bool roleExist = await _roleManager.RoleExistsAsync(role);
+                    Console.WriteLine($"Checking role: {role}, Exists: {roleExist}");
+
+                    if (!roleExist)
+                    {
+                        var result = await _roleManager.CreateAsync(new IdentityRole(role));
+                        if (!result.Succeeded)
+                        {
+                            Console.WriteLine($"Error creating role {role}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                        }
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in CreateRolesAsync: {ex.Message}");
+            }
         }
+
     }
 }
