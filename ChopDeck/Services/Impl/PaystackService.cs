@@ -1,5 +1,4 @@
-﻿using Azure;
-using ChopDeck.Services.Interfaces;
+﻿using ChopDeck.Services.Interfaces;
 using ChopDeck.Models;
 using Microsoft.Extensions.Options;
 using System;

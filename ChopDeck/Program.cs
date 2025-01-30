@@ -71,7 +71,7 @@ builder.Services.AddControllers(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
-    options.UseSqlServer(Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"));
+    options.UseNpgsql(Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"));
 });
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
