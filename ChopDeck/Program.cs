@@ -130,11 +130,8 @@ var roleSeeder = services.GetRequiredService<IRoleService>();
 await roleSeeder.CreateRolesAsync();
 
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseCors(x => x.
