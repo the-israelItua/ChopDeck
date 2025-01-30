@@ -18,7 +18,9 @@ RUN dotnet publish "ChopDeck.csproj" -c Release -o /app/publish
 # Copy published app to base image
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish 
+
+# Corrected COPY command with a destination folder
+COPY --from=publish /app/publish /app
 
 # Start the app
 ENTRYPOINT ["dotnet", "ChopDeck.dll"]
