@@ -7,7 +7,7 @@ EXPOSE 80
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY ["ChopDeck.csproj", "/"]
-RUN dotnet restore "ChopDeck/ChopDeck.csproj"
+RUN dotnet restore "ChopDeck.csproj"
 COPY . .
 WORKDIR "/src/ChopDeck"
 RUN dotnet build "ChopDeck.csproj" -c Release -o /app/build
