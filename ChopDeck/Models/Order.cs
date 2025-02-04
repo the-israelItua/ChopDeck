@@ -17,7 +17,7 @@ namespace ChopDeck.Models
         public int? DriverId { get; set; }
         public Driver? Driver { get; set; }
         public string Status { get; set; } = OrderStatus.PendingPayment.ToString();
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public ICollection<OrderItem>? OrderItems { get; set; }
     }
 }

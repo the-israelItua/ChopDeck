@@ -12,6 +12,6 @@ namespace ChopDeck.Models
         public int? RestaurantId { get; set; }
         public Restaurant? Restaurant { get; set; }
         public ICollection<CartItem>? CartItems { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

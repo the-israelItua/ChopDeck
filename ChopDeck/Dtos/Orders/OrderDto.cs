@@ -20,7 +20,7 @@ namespace ChopDeck.Dtos.Orders
         public int? DriverId { get; set; }
         public DriverDto? Driver { get; set; }
         public string Status { get; set; } = OrderStatus.PendingPayment.ToString();
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public ICollection<OrderItem>? OrderItems { get; set; }
     }
 }
