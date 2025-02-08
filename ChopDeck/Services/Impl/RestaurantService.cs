@@ -252,9 +252,6 @@ namespace ChopDeck.Services.Impl
                 var createdUser = await _userManager.CreateAsync(applicationUser, createRestaurantDto.Password);
                 if (createdUser.Succeeded)
                 {
-                    var roleResult = await _userManager.AddToRoleAsync(applicationUser, "Restaurant");
-                    if (roleResult.Succeeded)
-                    {
                         var restaurant = new Restaurant
                         {
                             ApplicationUser = applicationUser,
@@ -274,16 +271,7 @@ namespace ChopDeck.Services.Impl
                             Token = _tokenService.CreateToken(applicationUser)
                         };
 
-                    }
-                    else
-                    {
-                        var roleErrors = roleResult.Errors.Select(e => e.Description).ToList();
-                        return new ApiResponse<RestaurantDto>
-                        {
-                            Status = 500,
-                            Message = "Failed to assign role",
-                        };
-                    }
+                    
                 }
                 else
                 {

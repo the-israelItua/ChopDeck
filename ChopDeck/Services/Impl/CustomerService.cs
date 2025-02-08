@@ -50,9 +50,7 @@ namespace ChopDeck.Services.Impl{
                 var createdUser = await _userManager.CreateAsync(applicationUser, createCustomerDto.Password);
                 if (createdUser.Succeeded)
                 {
-                    var roleResult = await _userManager.AddToRoleAsync(applicationUser, "CUSTOMER");
-                    if (roleResult.Succeeded)
-                    {
+
                         var customer = new Customer
                         {
                             ApplicationUser = applicationUser,
@@ -68,19 +66,7 @@ namespace ChopDeck.Services.Impl{
                             Token = _tokenService.CreateToken(applicationUser)
                         };
 
-                    }
-                    else
-                    {
-                        var roleErrors = roleResult.Errors.Select(e => e.Description).ToList();
-
-                        Log.Error("An error occurred while assigning roles: {@RoleErrors}", roleErrors);
-
-                        return new ApiResponse<CustomerDto>
-                        {
-                            Status = 500,
-                            Message = "Failed to assign role",
-                        };
-                    }
+                    
                 }
                 else
                 {

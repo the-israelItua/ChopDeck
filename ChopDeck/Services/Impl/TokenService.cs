@@ -22,7 +22,6 @@ namespace ChopDeck.Services.Impl
             var claims = new List<Claim>
     {
         new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-        new Claim(ClaimTypes.NameIdentifier, user.Id),
         new Claim(JwtRegisteredClaimNames.Email, user.Email),
         new Claim(JwtRegisteredClaimNames.GivenName, user.Name)
     };
@@ -31,7 +30,6 @@ namespace ChopDeck.Services.Impl
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = creds,
                 Issuer = Environment.GetEnvironmentVariable("JWT_ISSUER"),

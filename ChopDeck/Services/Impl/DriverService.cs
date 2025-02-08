@@ -226,9 +226,6 @@ namespace ChopDeck.Services.Impl
                 var createdUser = await _userManager.CreateAsync(applicationUser, createDriverDto.Password);
                 if (createdUser.Succeeded)
                 {
-                    var roleResult = await _userManager.AddToRoleAsync(applicationUser, "Driver");
-                    if (roleResult.Succeeded)
-                    {
                         var Driver = new Driver
                         {
                             ApplicationUser = applicationUser,
@@ -247,19 +244,6 @@ namespace ChopDeck.Services.Impl
                             Data = Driver.ToDriverDto(),
                             Token = _tokenService.CreateToken(applicationUser)
                         };
-
-                    }
-                    else
-                    {
-
-                        var roleErrors = roleResult.Errors.Select(e => e.Description).ToList();
-                        Log.Error("An error occurred while assigning roles: {@RoleErrors}", roleErrors);
-                        return  new ApiResponse<DriverDto>
-                        {
-                            Status = 500,
-                            Message = "Failed to assign role",
-                        };
-                    }
                 }
                 else
                 {
