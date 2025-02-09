@@ -18,6 +18,9 @@ namespace ChopDeck.Dtos.Customers
         [Required]
         public string PhoneNumber { get; set; } = string.Empty;
         [Required]
+        [MinLength(8, ErrorMessage = "Password must be at least 8 characters.")]
+        [RegularExpression(@"^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$",
+            ErrorMessage = "Password must have at least one uppercase letter, one number, and one special character.")]
         public string Password { get; set; } = string.Empty;
     }
 }

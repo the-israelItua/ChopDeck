@@ -81,7 +81,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 8;
-}).AddEntityFrameworkStores<ApplicationDBContext>();
+}).AddRoles<IdentityRole>().
+AddEntityFrameworkStores<ApplicationDBContext>();
 
 
 
@@ -108,6 +109,7 @@ builder.Services.AddScoped<IRestaurantService, RestaurantService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IDriverService, DriverService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddHttpClient<IPaystackService, PaystackService>();
 builder.Services.AddScoped<IRoleService, RoleService>();

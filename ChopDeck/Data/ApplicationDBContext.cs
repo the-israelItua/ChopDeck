@@ -96,26 +96,27 @@ namespace ChopDeck.Data
                 .HasForeignKey(o => o.DriverId)
                 .OnDelete(DeleteBehavior.SetNull);
 
+
             modelBuilder.Entity<IdentityRole>().HasData(
-                new IdentityRole
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Name = "Customer",
-                    NormalizedName = "CUSTOMER"
-                },
-                new IdentityRole
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Name = "Restaurant",
-                    NormalizedName = "RESTAURANT"
-                },
-                new IdentityRole
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Name = "Driver",
-                    NormalizedName = "DRIVER"
-                }
-            );
+            new IdentityRole
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "Customer",
+                NormalizedName = "CUSTOMER"
+            },
+            new IdentityRole
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "Restaurant",
+                NormalizedName = "RESTAURANT"
+            },
+            new IdentityRole
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "Driver",
+                NormalizedName = "DRIVER"
+            }
+        );
         }
     }
 }

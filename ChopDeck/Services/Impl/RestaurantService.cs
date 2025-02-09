@@ -10,6 +10,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using ChopDeck.Helpers;
+using ChopDeck.Dtos.Customers;
 
 namespace ChopDeck.Services.Impl
 {
@@ -32,7 +33,8 @@ namespace ChopDeck.Services.Impl
         }
         public async Task<ApiResponse<RestaurantDto>> UpdateRestaurantAsync(UpdateRestaurantDto updateDto, string userId)
         {
-            try{
+            try
+            {
                 var restaurant = await _restaurantRepo.GetByUserIdAsync(userId);
                 if (restaurant == null)
                 {
@@ -77,8 +79,8 @@ namespace ChopDeck.Services.Impl
             }
             catch (Exception e)
             {
-                 Log.Error(e, "An error occured");
-                return  new ApiResponse<RestaurantDto>
+                Log.Error(e, "An error occured");
+                return new ApiResponse<RestaurantDto>
                 {
                     Status = 500,
                     Message = "An unexpected error occurred",
@@ -88,7 +90,8 @@ namespace ChopDeck.Services.Impl
 
         public async Task<ApiResponse<RestaurantDto>> DeleteRestaurantAsync(int id, string userId)
         {
-            try{
+            try
+            {
                 var restaurant = await _restaurantRepo.DeleteAsync(id, userId);
 
                 if (restaurant == null)
@@ -107,11 +110,11 @@ namespace ChopDeck.Services.Impl
                 };
             }
 
-    
+
             catch (Exception e)
             {
-                 Log.Error(e, "An error occured");
-                return  new ApiResponse<RestaurantDto>
+                Log.Error(e, "An error occured");
+                return new ApiResponse<RestaurantDto>
                 {
                     Status = 500,
                     Message = "An unexpected error occurred",
@@ -121,7 +124,8 @@ namespace ChopDeck.Services.Impl
 
         public async Task<ApiResponse<RestaurantDto>> GetRestaurantByIdAsync(int id)
         {
-            try{
+            try
+            {
 
                 var restaurant = await _restaurantRepo.GetByIdAsync(id);
 
@@ -143,8 +147,8 @@ namespace ChopDeck.Services.Impl
             }
             catch (Exception e)
             {
-                 Log.Error(e, "An error occured");
-                return  new ApiResponse<RestaurantDto>
+                Log.Error(e, "An error occured");
+                return new ApiResponse<RestaurantDto>
                 {
                     Status = 500,
                     Message = "An unexpected error occurred",
@@ -154,7 +158,8 @@ namespace ChopDeck.Services.Impl
 
         public async Task<ApiResponse<List<RestaurantDto>>> GetRestaurantsAsync(RestaurantQueryObject queryObject)
         {
-            try{
+            try
+            {
                 string cacheKey = $"restaurants_{queryObject.Name}_{queryObject.PageSize}_{queryObject.PageNumber}";
 
                 if (!_cache.TryGetValue(cacheKey, out List<RestaurantDto>? cachedRestaurants))
@@ -175,8 +180,8 @@ namespace ChopDeck.Services.Impl
             }
             catch (Exception e)
             {
-                 Log.Error(e, "An error occured");
-                return  new ApiResponse<List<RestaurantDto>>
+                Log.Error(e, "An error occured");
+                return new ApiResponse<List<RestaurantDto>>
                 {
                     Status = 500,
                     Message = "An unexpected error occurred",
@@ -252,37 +257,46 @@ namespace ChopDeck.Services.Impl
                 var createdUser = await _userManager.CreateAsync(applicationUser, createRestaurantDto.Password);
                 if (createdUser.Succeeded)
                 {
-                        var restaurant = new Restaurant
-                        {
-                            ApplicationUser = applicationUser,
-                            Description = createRestaurantDto.Description,
-                            CuisineType = createRestaurantDto.CuisineType,
-                            ImageUrl = createRestaurantDto.ImageUrl,
-                            LogoUrl = createRestaurantDto.LogoUrl,
-                        };
-
-                        await _restaurantRepo.CreateAsync(restaurant);
-
+                    var roleResult = await _userManager.AddToRoleAsync(applicationUser, "Restaurant");
+                    if (!roleResult.Succeeded)
+                    {
+                        var roleErrors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                        Log.Error("An error occurred while assigning roles oooo: {RoleErrors}", roleErrors);
                         return new ApiResponse<RestaurantDto>
                         {
-                            Status = 201,
-                            Message = "Restaurant created successfully.",
-                            Data = restaurant.ToRestaurantDto(),
-                            Token = _tokenService.CreateToken(applicationUser)
+                            Status = 500,
+                            Message = roleErrors,
                         };
+                    }
+                    var restaurant = new Restaurant
+                    {
+                        ApplicationUser = applicationUser,
+                        Description = createRestaurantDto.Description,
+                        CuisineType = createRestaurantDto.CuisineType,
+                        ImageUrl = createRestaurantDto.ImageUrl,
+                        LogoUrl = createRestaurantDto.LogoUrl,
+                    };
 
-                    
+                    await _restaurantRepo.CreateAsync(restaurant);
+
+                    return new ApiResponse<RestaurantDto>
+                    {
+                        Status = 201,
+                        Message = "Restaurant created successfully.",
+                        Data = restaurant.ToRestaurantDto(),
+                        Token = _tokenService.CreateToken(applicationUser)
+                    };
+
+
                 }
                 else
                 {
-                    var creationErrors = createdUser.Errors
-                        .Where(e => !e.Description.Contains("Username", StringComparison.OrdinalIgnoreCase))
-                        .Select(e => e.Description)
-                        .ToList();
+                    var creationErrors = string.Join(", ", createdUser.Errors.Select(e => e.Description));
+                    Log.Error("User creation failed: {CreationErrors}", creationErrors);
                     return new ApiResponse<RestaurantDto>
                     {
-                        Status = 500,
-                        Message = "Failed to create user",
+                        Status = 400,
+                        Message = creationErrors,
                     };
                 }
             }
@@ -320,7 +334,8 @@ namespace ChopDeck.Services.Impl
         }
         public async Task<ApiResponse<RestaurantOrderDto>> GetOrderByIdAsync(int id, string userId)
         {
-            try{
+            try
+            {
                 var order = await _orderRepo.GetRestaurantOrderByIdAsync(id, userId);
 
                 if (order == null)
@@ -341,8 +356,8 @@ namespace ChopDeck.Services.Impl
             }
             catch (Exception e)
             {
-                 Log.Error(e, "An error occured");
-                return  new ApiResponse<RestaurantOrderDto>
+                Log.Error(e, "An error occured");
+                return new ApiResponse<RestaurantOrderDto>
                 {
                     Status = 500,
                     Message = "An unexpected error occurred",
@@ -352,7 +367,8 @@ namespace ChopDeck.Services.Impl
 
         public async Task<ApiResponse<OrderDto>> UpdateOrderStatusAsync(int id, UpdateRestaurantOrderDto updateDto, string userId)
         {
-            try{
+            try
+            {
 
                 var order = await _orderRepo.GetOrderByIdAsync(id);
                 if (order == null || order.Restaurant.ApplicationUser.Id != userId)
@@ -382,8 +398,8 @@ namespace ChopDeck.Services.Impl
             }
             catch (Exception e)
             {
-                 Log.Error(e, "An error occured");
-                return  new ApiResponse<OrderDto>
+                Log.Error(e, "An error occured");
+                return new ApiResponse<OrderDto>
                 {
                     Status = 500,
                     Message = "An unexpected error occurred",

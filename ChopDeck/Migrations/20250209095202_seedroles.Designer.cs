@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChopDeck.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250201194347_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250209095202_seedroles")]
+    partial class seedroles
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -406,6 +406,26 @@ namespace ChopDeck.Migrations
                         .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "83eded44-8fb2-48b5-94bb-5a7bc7feeaf6",
+                            Name = "Customer",
+                            NormalizedName = "CUSTOMER"
+                        },
+                        new
+                        {
+                            Id = "c847b0ad-4965-4b81-a414-c47d3175fc99",
+                            Name = "Restaurant",
+                            NormalizedName = "RESTAURANT"
+                        },
+                        new
+                        {
+                            Id = "b5a14237-5b32-4086-b232-612743863d0c",
+                            Name = "Driver",
+                            NormalizedName = "DRIVER"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

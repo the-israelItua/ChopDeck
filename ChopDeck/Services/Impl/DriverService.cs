@@ -9,6 +9,7 @@ using ChopDeck.Services.Interfaces;
 using ChopDeck.Mappers;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
+using ChopDeck.Dtos.Customers;
 
 namespace ChopDeck.Services.Impl
 {
@@ -31,42 +32,43 @@ namespace ChopDeck.Services.Impl
 
         public async Task<ApiResponse<OrderDto>> AssignOrderAsync(int orderId, string userEmail)
         {
-            try{
-            var driver = await _driverRepo.GetByEmailAsync(userEmail);
-            if (driver == null)
+            try
             {
+                var driver = await _driverRepo.GetByEmailAsync(userEmail);
+                if (driver == null)
+                {
+                    return new ApiResponse<OrderDto>
+                    {
+                        Status = 401,
+                        Message = "You don't permission to perform this task"
+                    };
+                }
+
+                var order = await _orderRepo.GetOrderByIdAsync(orderId);
+
+                if (order == null)
+                {
+                    return new ApiResponse<OrderDto>
+                    {
+                        Status = 404,
+                        Message = "Order not found."
+                    };
+                }
+
+                order.DriverId = driver.Id;
+                order.Status = OrderStatus.AssignedToDriver.ToString();
+                await _orderRepo.UpdateOrderAsync(order);
                 return new ApiResponse<OrderDto>
                 {
-                    Status = 401,
-                    Message = "You don't permission to perform this task"
+                    Status = 200,
+                    Message = "Driver assigned to order.",
+                    Data = order.ToOrderDto()
                 };
             }
-
-            var order = await _orderRepo.GetOrderByIdAsync(orderId);
-
-            if (order == null)
-            {
-                return new ApiResponse<OrderDto>
-                {
-                    Status = 404,
-                    Message = "Order not found."
-                };
-            }
-
-            order.DriverId = driver.Id;
-            order.Status = OrderStatus.AssignedToDriver.ToString();
-            await _orderRepo.UpdateOrderAsync(order);
-            return new ApiResponse<OrderDto>
-            {
-                Status = 200,
-                Message = "Driver assigned to order.",
-                Data = order.ToOrderDto()
-            };
-                  }
             catch (Exception e)
             {
-                 Log.Error(e, "An error occured");
-                return  new ApiResponse<OrderDto>
+                Log.Error(e, "An error occured");
+                return new ApiResponse<OrderDto>
                 {
                     Status = 500,
                     Message = "An unexpected error occurred",
@@ -76,31 +78,32 @@ namespace ChopDeck.Services.Impl
 
         public async Task<ApiResponse<DriverDto>> DeleteAsync(string userEmail)
         {
-            try{
-            var driver = await _driverRepo.GetByEmailAsync(userEmail);
-
-            if (driver == null)
+            try
             {
-                return new ApiResponse<DriverDto>
+                var driver = await _driverRepo.GetByEmailAsync(userEmail);
+
+                if (driver == null)
                 {
-                    Status = 404,
-                    Message = "Driver not found."
-                };
-            }
+                    return new ApiResponse<DriverDto>
+                    {
+                        Status = 404,
+                        Message = "Driver not found."
+                    };
+                }
 
-            await _driverRepo.DeleteAsync(driver);
+                await _driverRepo.DeleteAsync(driver);
 
-            return new ApiResponse<DriverDto>
+                return new ApiResponse<DriverDto>
                 {
                     Status = 204,
                     Message = "Driver account deleted."
                 };
 
-                      }
+            }
             catch (Exception e)
             {
-                 Log.Error(e, "An error occured");
-                return  new ApiResponse<DriverDto>
+                Log.Error(e, "An error occured");
+                return new ApiResponse<DriverDto>
                 {
                     Status = 500,
                     Message = "An unexpected error occurred",
@@ -109,28 +112,30 @@ namespace ChopDeck.Services.Impl
         }
 
         public async Task<ApiResponse<DriverDto>> GetDetailsAsync(string userEmail)
-        {try{
-            var driver = await _driverRepo.GetByEmailAsync(userEmail);
-            if (driver == null)
+        {
+            try
             {
-                return new ApiResponse<DriverDto>
+                var driver = await _driverRepo.GetByEmailAsync(userEmail);
+                if (driver == null)
                 {
-                    Status = 401,
-                    Message = "You don't permission to perform this task"
-                };
+                    return new ApiResponse<DriverDto>
+                    {
+                        Status = 401,
+                        Message = "You don't permission to perform this task"
+                    };
                 }
 
-            return new ApiResponse<DriverDto>
-            {
-                Status = 200,
-                Message = "Driver fetched successfully.",
-                Data = driver.ToDriverDto()
-            };
-                  }
+                return new ApiResponse<DriverDto>
+                {
+                    Status = 200,
+                    Message = "Driver fetched successfully.",
+                    Data = driver.ToDriverDto()
+                };
+            }
             catch (Exception e)
             {
-                 Log.Error(e, "An error occured");
-                return  new ApiResponse<DriverDto>
+                Log.Error(e, "An error occured");
+                return new ApiResponse<DriverDto>
                 {
                     Status = 500,
                     Message = "An unexpected error occurred",
@@ -140,7 +145,8 @@ namespace ChopDeck.Services.Impl
 
         public async Task<ApiResponse<List<RestaurantOrderListDto>>> GetOrdersAsync(PaginationQueryObject queryObject)
         {
-            try{
+            try
+            {
                 var orders = await _orderRepo.GetPreparedOrdersAsync(queryObject);
                 return new ApiResponse<List<RestaurantOrderListDto>>
                 {
@@ -148,11 +154,11 @@ namespace ChopDeck.Services.Impl
                     Message = "Orders fetched successfully",
                     Data = orders
                 };
-                  }
+            }
             catch (Exception e)
             {
-                 Log.Error(e, "An error occured");
-                return  new ApiResponse<List<RestaurantOrderListDto>>
+                Log.Error(e, "An error occured");
+                return new ApiResponse<List<RestaurantOrderListDto>>
                 {
                     Status = 500,
                     Message = "An unexpected error occurred",
@@ -162,36 +168,38 @@ namespace ChopDeck.Services.Impl
 
         public async Task<ApiResponse<DriverDto>> LoginAsync(LoginDto loginDto)
         {
-            try{
- var driver = await _driverRepo.GetByEmailAsync(loginDto.Email);
-            if (driver == null)
+            try
             {
+                var driver = await _driverRepo.GetByEmailAsync(loginDto.Email);
+                if (driver == null)
+                {
+                    return new ApiResponse<DriverDto>
+                    {
+                        Status = 401,
+                        Message = "Email or password incorrect"
+                    };
+                }
+
+                var passwordCheck = await _signInManager.CheckPasswordSignInAsync(driver.ApplicationUser, loginDto.Password, false);
+
+                if (!passwordCheck.Succeeded)
+                {
+                    return new ApiResponse<DriverDto>
+                    {
+                        Status = 401,
+                        Message = "Email or password incorrect"
+                    };
+                }
+
                 return new ApiResponse<DriverDto>
                 {
-                    Status = 401,
-                    Message = "Email or password incorrect"
+                    Status = 201,
+                    Message = "Login successfully.",
+                    Data = driver.ToDriverDto(),
+                    Token = _tokenService.CreateToken(driver.ApplicationUser)
                 };
             }
-
-            var passwordCheck = await _signInManager.CheckPasswordSignInAsync(driver.ApplicationUser, loginDto.Password, false);
-
-            if (!passwordCheck.Succeeded)
-            {
-                return new ApiResponse<DriverDto>
-                {
-                    Status = 401,
-                    Message = "Email or password incorrect"
-                };
-            }
-
-            return new ApiResponse<DriverDto>
-            {
-                Status = 201,
-                Message = "Login successfully.",
-                Data = driver.ToDriverDto(),
-                Token = _tokenService.CreateToken(driver.ApplicationUser)
-            };
-            } catch (Exception e)
+            catch (Exception e)
             {
                 Log.Error(e, "An error occured");
                 return new ApiResponse<DriverDto>
@@ -199,17 +207,17 @@ namespace ChopDeck.Services.Impl
                     Status = 500,
                     Message = "An error occurred while processing your request.",
                 };
-            } 
+            }
         }
 
         public async Task<ApiResponse<DriverDto>> RegisterAsync(CreateDriverDto createDriverDto)
         {
-          try
+            try
             {
                 var existingDriver = await _driverRepo.DriverEmailExists(createDriverDto.Email);
                 if (existingDriver)
                 {
-                    return new ApiResponse<DriverDto>{ Status = 409, Message = "A Driver with this email already exists." };
+                    return new ApiResponse<DriverDto> { Status = 409, Message = "A Driver with this email already exists." };
                 }
 
                 var applicationUser = new ApplicationUser
@@ -226,43 +234,51 @@ namespace ChopDeck.Services.Impl
                 var createdUser = await _userManager.CreateAsync(applicationUser, createDriverDto.Password);
                 if (createdUser.Succeeded)
                 {
-                        var Driver = new Driver
+                    var roleResult = await _userManager.AddToRoleAsync(applicationUser, "Driver");
+                    if (!roleResult.Succeeded)
+                    {
+                        var roleErrors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                        Log.Error("An error occurred while assigning roles oooo: {RoleErrors}", roleErrors);
+                        return new ApiResponse<DriverDto>
                         {
-                            ApplicationUser = applicationUser,
-                            LicenseNumber = createDriverDto.LicenseNumber,
-                            VehicleType = createDriverDto.VehicleType,
-                            StateOfOrigin = createDriverDto.StateOfOrigin,
-                            ProfilePicture = createDriverDto.ProfilePicture,
+                            Status = 500,
+                            Message = roleErrors,
                         };
+                    }
+                    var Driver = new Driver
+                    {
+                        ApplicationUser = applicationUser,
+                        LicenseNumber = createDriverDto.LicenseNumber,
+                        VehicleType = createDriverDto.VehicleType,
+                        StateOfOrigin = createDriverDto.StateOfOrigin,
+                        ProfilePicture = createDriverDto.ProfilePicture,
+                    };
 
-                        await _driverRepo.CreateAsync(Driver);
+                    await _driverRepo.CreateAsync(Driver);
 
-                        return  new ApiResponse<DriverDto>
-                        {
-                            Status = 201,
-                            Message = "Driver created successfully.",
-                            Data = Driver.ToDriverDto(),
-                            Token = _tokenService.CreateToken(applicationUser)
-                        };
+                    return new ApiResponse<DriverDto>
+                    {
+                        Status = 201,
+                        Message = "Driver created successfully.",
+                        Data = Driver.ToDriverDto(),
+                        Token = _tokenService.CreateToken(applicationUser)
+                    };
                 }
                 else
                 {
-                    var creationErrors = createdUser.Errors
-                        .Where(e => !e.Description.Contains("Username", StringComparison.OrdinalIgnoreCase))
-                        .Select(e => e.Description)
-                        .ToList();
-                     Log.Error("An error occurred while assigning roles: {@CreationErrors}", "An error occured");
-                    return  new ApiResponse<DriverDto>
+                    var creationErrors = string.Join(", ", createdUser.Errors.Select(e => e.Description));
+                    Log.Error("User creation failed: {CreationErrors}", creationErrors);
+                    return new ApiResponse<DriverDto>
                     {
-                        Status = 500,
-                        Message = "Failed to create user",
+                        Status = 400,
+                        Message = creationErrors,
                     };
                 }
             }
             catch (Exception e)
             {
-                 Log.Error(e, "An error occured");
-                return  new ApiResponse<DriverDto>
+                Log.Error(e, "An error occured");
+                return new ApiResponse<DriverDto>
                 {
                     Status = 500,
                     Message = "An unexpected error occurred",
@@ -272,53 +288,54 @@ namespace ChopDeck.Services.Impl
 
         public async Task<ApiResponse<DriverDto>> UpdateDetailsAsync(string userId, UpdateDriverDto updateDto)
         {
-            try{
-           var driver = await _driverRepo.GetByUserIdAsync(userId);
-            if (driver == null)
+            try
             {
+                var driver = await _driverRepo.GetByUserIdAsync(userId);
+                if (driver == null)
+                {
+                    return new ApiResponse<DriverDto>
+                    {
+                        Status = 401,
+                        Message = "You do not have permission to perform this operation."
+                    };
+                }
+
+                if (!string.IsNullOrWhiteSpace(updateDto.LicenseNumber))
+                {
+                    driver.LicenseNumber = updateDto.LicenseNumber;
+                }
+                if (!string.IsNullOrWhiteSpace(updateDto.VehicleType))
+                {
+                    driver.VehicleType = updateDto.VehicleType;
+                }
+
+                if (!string.IsNullOrWhiteSpace(updateDto.ProfilePicture))
+                {
+                    driver.ProfilePicture = updateDto.ProfilePicture;
+                }
+
+                if (!string.IsNullOrWhiteSpace(updateDto.StateOfOrigin))
+                {
+                    driver.StateOfOrigin = updateDto.StateOfOrigin;
+                }
+                if (updateDto.Status == DriverStatus.Available.ToString() || updateDto.Status == DriverStatus.Closed.ToString() || updateDto.Status == DriverStatus.OnLeave.ToString())
+                {
+                    driver.Status = updateDto.Status;
+                }
+
+
+                await _driverRepo.UpdateAsync(driver);
                 return new ApiResponse<DriverDto>
                 {
-                    Status = 401,
-                    Message = "You do not have permission to perform this operation."
+                    Status = 200,
+                    Message = "Driver updated successfully.",
+                    Data = driver.ToDriverDto()
                 };
             }
-
-            if (!string.IsNullOrWhiteSpace(updateDto.LicenseNumber))
-            {
-                driver.LicenseNumber = updateDto.LicenseNumber;
-            }
-            if (!string.IsNullOrWhiteSpace(updateDto.VehicleType))
-            {
-                driver.VehicleType = updateDto.VehicleType;
-            }
-
-            if (!string.IsNullOrWhiteSpace(updateDto.ProfilePicture))
-            {
-                driver.ProfilePicture = updateDto.ProfilePicture;
-            }
-
-            if (!string.IsNullOrWhiteSpace(updateDto.StateOfOrigin))
-            {
-                driver.StateOfOrigin = updateDto.StateOfOrigin;
-            }
-            if (updateDto.Status == DriverStatus.Available.ToString() || updateDto.Status == DriverStatus.Closed.ToString() || updateDto.Status == DriverStatus.OnLeave.ToString())
-            {
-                driver.Status = updateDto.Status;
-            }
-
-
-            await _driverRepo.UpdateAsync(driver);
-            return new ApiResponse<DriverDto>
-            {
-                Status = 200,
-                Message = "Driver updated successfully.",
-                Data = driver.ToDriverDto()
-            };
-      }
             catch (Exception e)
             {
-                 Log.Error(e, "An error occured");
-                return  new ApiResponse<DriverDto>
+                Log.Error(e, "An error occured");
+                return new ApiResponse<DriverDto>
                 {
                     Status = 500,
                     Message = "An unexpected error occurred",
@@ -328,36 +345,37 @@ namespace ChopDeck.Services.Impl
 
         public async Task<ApiResponse<OrderDto>> UpdateOrderStatusAsync(int id, UpdateDriverOrderDto updateDto, string userId)
         {
-     try{
-            var order = await _orderRepo.GetOrderByIdAsync(id);
-            if (order == null || order.Driver.ApplicationUser.Id != userId)
-
+            try
             {
+                var order = await _orderRepo.GetOrderByIdAsync(id);
+                if (order == null || order.Driver.ApplicationUser.Id != userId)
+
+                {
+                    return new ApiResponse<OrderDto>
+                    {
+                        Status = 401,
+                        Message = "Order not found"
+                    };
+                }
+
+                if (!string.IsNullOrWhiteSpace(updateDto.Status))
+                {
+                    order.Status = updateDto.Status;
+                }
+
+                await _orderRepo.UpdateOrderAsync(order);
+
                 return new ApiResponse<OrderDto>
                 {
-                    Status = 401,
-                    Message = "Order not found"
+                    Status = 200,
+                    Message = "Order status updated successfully.",
+                    Data = order.ToOrderDto()
                 };
             }
-
-            if (!string.IsNullOrWhiteSpace(updateDto.Status))
-            {
-                order.Status = updateDto.Status;
-            }
-
-            await _orderRepo.UpdateOrderAsync(order);
-
-            return new ApiResponse<OrderDto>
-            {
-                Status = 200,
-                Message = "Order status updated successfully.",
-                Data = order.ToOrderDto()
-            };
-      }
             catch (Exception e)
             {
-                 Log.Error(e, "An error occured");
-                return  new ApiResponse<OrderDto>
+                Log.Error(e, "An error occured");
+                return new ApiResponse<OrderDto>
                 {
                     Status = 500,
                     Message = "An unexpected error occurred",

@@ -4,10 +4,12 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace ChopDeck.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class seedroles : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -376,6 +378,16 @@ namespace ChopDeck.Migrations
                         principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { "83eded44-8fb2-48b5-94bb-5a7bc7feeaf6", null, "Customer", "CUSTOMER" },
+                    { "b5a14237-5b32-4086-b232-612743863d0c", null, "Driver", "DRIVER" },
+                    { "c847b0ad-4965-4b81-a414-c47d3175fc99", null, "Restaurant", "RESTAURANT" }
                 });
 
             migrationBuilder.CreateIndex(

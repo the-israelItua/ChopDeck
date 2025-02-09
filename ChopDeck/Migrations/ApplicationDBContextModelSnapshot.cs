@@ -407,19 +407,19 @@ namespace ChopDeck.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "a687a1f9-f603-4d95-bdd6-5fa7b59b0621",
+                            Id = "83eded44-8fb2-48b5-94bb-5a7bc7feeaf6",
                             Name = "Customer",
                             NormalizedName = "CUSTOMER"
                         },
                         new
                         {
-                            Id = "f67e1e35-26cf-440d-85d6-bf7bd0bbcd7e",
+                            Id = "c847b0ad-4965-4b81-a414-c47d3175fc99",
                             Name = "Restaurant",
                             NormalizedName = "RESTAURANT"
                         },
                         new
                         {
-                            Id = "5ada4059-2a36-42b3-84a5-5c0526c46c25",
+                            Id = "b5a14237-5b32-4086-b232-612743863d0c",
                             Name = "Driver",
                             NormalizedName = "DRIVER"
                         });
