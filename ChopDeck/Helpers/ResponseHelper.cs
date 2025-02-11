@@ -7,17 +7,13 @@ namespace ChopDeck.Helpers
     {
         public static IActionResult HandleResponse<T>(ApiResponse<T> response)
         {
-            switch (response.Status)
+            return response.Status switch
             {
-                case 401:
-                    return new UnauthorizedObjectResult(response);
-
-                case 500:
-                    return new ObjectResult(response) { StatusCode = 500 };
-
-                default:
-                    return new OkObjectResult(response);
-            }
+                201 => new CreatedResult(string.Empty, response),
+                401 => new UnauthorizedObjectResult(response),
+                500 => new ObjectResult(response) { StatusCode = 500 },
+                _ => new OkObjectResult(response),
+            };
         }
     }
 }
